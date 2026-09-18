@@ -1,0 +1,14 @@
+{
+  "name": "impulsar",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Directorio de oficios del barrio — frontend estático + funciones serverless en Vercel sobre Supabase",
+  "engines": { "node": ">=22" },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.45.0",
+    "bcryptjs": "^2.4.3",
+    "formidable": "^3.5.1",
+    "postgres": "^3.4.4"
+  }
+}

@@ -121,7 +121,7 @@ document.addEventListener("DOMContentLoaded", () => {
     btn.disabled = true;
     btn.textContent = "Enviando...";
 
-    fetch("api/registro.php", {
+    fetch("api/registro", {
       method: "POST",
       body: datos
     })

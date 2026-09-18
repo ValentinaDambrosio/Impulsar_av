@@ -30,7 +30,7 @@ function pintarCalificacion(card, data) {
 }
 
 function cargarCalificaciones() {
-  fetch(`${API_BASE}/get_ratings.php`)
+  fetch(`${API_BASE}/get_ratings`)
     .then((res) => res.json())
     .then((data) => {
       document.querySelectorAll(".directory-card").forEach((card) => {

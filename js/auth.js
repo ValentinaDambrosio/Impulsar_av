@@ -126,7 +126,7 @@ function inyectarModalLogin() {
     boton.disabled = true;
     boton.textContent = "Enviando...";
 
-    fetch("api/solicitar_reset.php", {
+    fetch("api/solicitar_reset", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email: document.getElementById("authOlvideEmail").value.trim() })
@@ -150,7 +150,7 @@ function inyectarModalLogin() {
     const mensaje = document.getElementById("authLoginMensaje");
     mensaje.textContent = "";
 
-    fetch("api/login.php", {
+    fetch("api/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -188,7 +188,7 @@ function inyectarModalLogin() {
       return;
     }
 
-    fetch("api/registro_usuario.php", {
+    fetch("api/registro_usuario", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -292,14 +292,14 @@ function actualizarNavbar() {
 }
 
 function cerrarSesion() {
-  fetch("api/logout.php", { method: "POST" }).then(() => {
+  fetch("api/logout", { method: "POST" }).then(() => {
     aplicarSesion(false);
     window.location.href = "index.html";
   });
 }
 
 function verificarSesion() {
-  return fetch("api/session_check.php")
+  return fetch("api/session_check")
     .then((res) => res.json())
     .then((data) => {
       aplicarSesion(data.logueado, data.tipo, data.nombre);
@@ -316,7 +316,7 @@ document.addEventListener("click", (e) => {
   const tarjeta = boton.closest("[data-id]");
   const tipo = ["call", "whatsapp", "instagram", "email"].find((t) => boton.classList.contains(`contact-${t}`));
   if (tarjeta && tipo) {
-    fetch("api/log_contacto.php", {
+    fetch("api/log_contacto", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       keepalive: true,

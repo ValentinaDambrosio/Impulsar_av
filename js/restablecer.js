@@ -36,7 +36,7 @@ document.addEventListener("DOMContentLoaded", () => {
     btn.disabled = true;
     btn.textContent = "Guardando...";
 
-    fetch("api/resetear_password.php", {
+    fetch("api/resetear_password", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ token, password: p1 })

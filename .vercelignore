@@ -1,0 +1,17 @@
+# Lo que NO se publica en Vercel.
+#
+# Con el preset "Other" Vercel sirve toda la raíz del repo como archivos
+# estáticos. Sin esto, cualquiera podría bajar el esquema de la base, los
+# scripts de migración o los 67 MB de uploads/ desde el sitio.
+
+# Fotos y videos viejos: son la fuente de la migración a Storage, no del sitio
+uploads/
+
+# Esquemas y migración: se corren a mano, no son parte de la app
+sql/
+migracion/
+
+# Documentación y configuración de ejemplo
+README.md
+.env.example
+.env*

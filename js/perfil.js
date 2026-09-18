@@ -27,16 +27,16 @@ function armarUrlInstagram(valor) {
 function armarMediaHtml(item) {
   if (item.tipo === "video") {
     return `
-      <div class="media-item media-video" data-src="uploads/videos-trabajo/${encodeURIComponent(item.archivo)}">
+      <div class="media-item media-video" data-src="${item.url}">
         <video muted preload="metadata">
-          <source src="uploads/videos-trabajo/${encodeURIComponent(item.archivo)}#t=0.1">
+          <source src="${item.url}#t=0.1">
         </video>
         <div class="media-play"><i class="fas fa-play"></i></div>
       </div>`;
   }
   return `
     <div class="media-item">
-      <img src="uploads/fotos-trabajo/${encodeURIComponent(item.archivo)}" alt="Foto del trabajo" loading="lazy">
+      <img src="${item.url}" alt="Foto del trabajo" loading="lazy">
     </div>`;
 }
 
@@ -70,7 +70,7 @@ function armarPagina(p) {
   const urlInstagram = armarUrlInstagram(p.instagram);
 
   const fotoUrl = p.foto
-    ? `uploads/fotos-perfil/${encodeURIComponent(p.foto)}`
+    ? p.foto
     : `https://ui-avatars.com/api/?name=${encodeURIComponent(p.nombre + " " + p.apellido)}&background=4891ff&color=fff&size=200`;
 
   const oficiosResumen =
@@ -153,7 +153,7 @@ function conectarCalificar(providerId) {
     btnEnviar.disabled = true;
     btnEnviar.textContent = "Enviando...";
 
-    fetch("api/submit_rating.php", {
+    fetch("api/submit_rating", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ provider_id: providerId, stars: valorElegido })
@@ -227,7 +227,7 @@ document.addEventListener("DOMContentLoaded", () => {
     return;
   }
 
-  fetch(`api/get_perfil.php?id=${encodeURIComponent(id)}`)
+  fetch(`api/get_perfil?id=${encodeURIComponent(id)}`)
     .then(async (res) => {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "No encontramos ese perfil");
@@ -239,7 +239,7 @@ document.addEventListener("DOMContentLoaded", () => {
       conectarCopiarEmail();
       conectarVideos();
 
-      fetch("api/log_vista_perfil.php", {
+      fetch("api/log_vista_perfil", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ provider_id: data.provider_id })

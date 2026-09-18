@@ -331,7 +331,7 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     });
 
-    fetch("api/guardar_oficios.php", {
+    fetch("api/guardar_oficios", {
       method: "POST",
       body: datos
     })

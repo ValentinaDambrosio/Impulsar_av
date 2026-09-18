@@ -21,7 +21,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (texto.length < 2) return;
 
     timeoutBusqueda = setTimeout(() => {
-      fetch("api/log_busqueda.php", {
+      fetch("api/log_busqueda", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ termino: texto })

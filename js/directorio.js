@@ -20,7 +20,7 @@ function armarTarjetaPersona(p) {
   const telDigitos = (p.celular || "").replace(/[^0-9]/g, "");
 
   const fotoUrl = p.foto
-    ? `uploads/fotos-perfil/${encodeURIComponent(p.foto)}`
+    ? p.foto
     : `https://ui-avatars.com/api/?name=${encodeURIComponent(p.nombre + " " + p.apellido)}&background=4891ff&color=fff&size=128`;
 
   const urlInstagram = armarUrlInstagram(p.instagram);
@@ -52,7 +52,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const grid = document.getElementById("directoryGrid");
   if (!grid) return;
 
-  fetch("api/get_directorio.php")
+  fetch("api/get_directorio")
     .then((res) => res.json())
     .then((personas) => {
       if (!Array.isArray(personas) || personas.length === 0) return;

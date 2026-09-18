@@ -61,11 +61,10 @@ function armarDesgloseContactos(porTipo, total) {
 
 
 function armarMediaMiniHtml(item) {
-  const carpeta = item.tipo === "video" ? "videos-trabajo" : "fotos-trabajo";
   if (item.tipo === "video") {
-    return `<video class="oficio-card-foto" src="uploads/${carpeta}/${encodeURIComponent(item.archivo)}" muted></video>`;
+    return `<video class="oficio-card-foto" src="${item.url}" muted></video>`;
   }
-  return `<img class="oficio-card-foto" src="uploads/${carpeta}/${encodeURIComponent(item.archivo)}" alt="Foto del trabajo">`;
+  return `<img class="oficio-card-foto" src="${item.url}" alt="Foto del trabajo">`;
 }
 
 function armarListaOficios(oficios) {
@@ -114,7 +113,7 @@ function conectarBorrarOficios() {
 
     boton.disabled = true;
 
-    fetch("api/eliminar_oficio.php", {
+    fetch("api/eliminar_oficio", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ oficio_id: oficioId })
@@ -149,7 +148,7 @@ function llenarFormulario(t) {
 
   const preview = document.getElementById("previewFotoActual");
   preview.src = t.foto
-    ? `uploads/fotos-perfil/${encodeURIComponent(t.foto)}`
+    ? t.foto
     : `https://ui-avatars.com/api/?name=${encodeURIComponent(t.nombre + " " + t.apellido)}&background=4891ff&color=fff&size=200`;
 }
 
@@ -188,7 +187,7 @@ function conectarFormularioEdicion() {
     const archivoFoto = document.getElementById("foto").files[0];
     if (archivoFoto) datos.append("foto", archivoFoto);
 
-    fetch("api/actualizar_perfil.php", { method: "POST", body: datos })
+    fetch("api/actualizar_perfil", { method: "POST", body: datos })
       .then(async (res) => {
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || "No se pudieron guardar los cambios");
@@ -216,7 +215,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const estado = document.getElementById("panelEstado");
   const contenido = document.getElementById("panelContenido");
 
-  fetch("api/session_check.php")
+  fetch("api/session_check")
     .then((res) => res.json())
     .then((sesion) => {
       if (!sesion.logueado || sesion.tipo !== "trabajador") {
@@ -224,7 +223,7 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
-      fetch("api/get_panel_datos.php")
+      fetch("api/get_panel_datos")
         .then(async (res) => {
           const data = await res.json();
           if (!res.ok) throw new Error(data.error || "No se pudo cargar tu panel");
