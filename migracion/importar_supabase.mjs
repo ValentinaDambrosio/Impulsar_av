@@ -183,6 +183,22 @@ async function importarResto() {
       VALUES (${b.termino}, ${b.usuario_nombre || null}, ${b.created_at})
     `;
   }
+
+  const seguimientos = datos.seguimientos || [];
+  log(`seguimientos: ${seguimientos.length}`);
+  for (const s of seguimientos) {
+    await sql`
+      INSERT INTO seguimientos
+        (id, provider_id, contactante_tipo, contactante_id, contactante_email,
+         contactante_nombre, estado, proxima_fecha, email_enviado, created_at, updated_at)
+      OVERRIDING SYSTEM VALUE
+      VALUES
+        (${Number(s.id)}, ${s.provider_id}, ${s.contactante_tipo}, ${String(s.contactante_id)},
+         ${s.contactante_email}, ${s.contactante_nombre}, ${s.estado}, ${s.proxima_fecha},
+         ${Boolean(Number(s.email_enviado))}, ${s.created_at}, ${s.updated_at})
+      ON CONFLICT (id) DO NOTHING
+    `;
+  }
 }
 
 /* Después de insertar IDs a mano, las secuencias quedaron atrás: el próximo
@@ -193,7 +209,7 @@ async function reacomodarSecuencias() {
 
   for (const tabla of ["trabajadores", "usuarios", "oficios", "oficios_media",
                        "ratings", "password_resets", "busquedas",
-                       "vistas_perfil", "contactos"]) {
+                       "vistas_perfil", "contactos", "seguimientos"]) {
     await sql`
       SELECT setval(
         pg_get_serial_sequence(${tabla}, 'id'),

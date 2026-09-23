@@ -1,37 +1,27 @@
-/* Antes: api/guardar_oficios.php — alta de trabajador, parte 2 */
+/* Antes: api/guardar_oficios.php — alta de trabajador, parte 2
+ *
+ * Los archivos ya están en Storage (el navegador los subió con /api/url_subida).
+ * Acá solo llegan metadatos en JSON: Vercel no vuelve a ver los archivos. */
 
 import { sql } from "../_lib/db.js";
-import { json, error } from "../_lib/http.js";
+import { json, error, cuerpo, soloMetodo } from "../_lib/http.js";
 import { leerSesion, crearCookie } from "../_lib/sesion.js";
 import {
-  parsearFormulario, subir, borrar,
-  BUCKETS, TIPOS_FOTO, TIPOS_VIDEO,
-  MAX_FOTO, MAX_VIDEO, MAX_ARCHIVOS_POR_OFICIO
+  borrar, BUCKETS, MAX_FOTOS_POR_OFICIO, MAX_VIDEOS_POR_OFICIO
 } from "../_lib/archivos.js";
 
-/* Llegan archivos (multipart): el body se lee crudo con formidable.
-   Ver el comentario de api/[ruta].js sobre no tocar req.body antes. */
+const EXT_FOTO = { jpg: "foto", jpeg: "foto", png: "foto", webp: "foto" };
+const EXT_VIDEO = { mp4: "video", webm: "video", mov: "video" };
 
 export default async function handler(req, res) {
-  if (req.method !== "POST") return error(res, 405, "Método no permitido");
+  if (!soloMetodo(req, res, "POST")) return;
 
-  let campos, archivos;
-  try {
-    ({ campos, archivos } = await parsearFormulario(req, { maxBytes: MAX_VIDEO }));
-  } catch (e) {
-    if (/maxFileSize|maxTotalFileSize/i.test(e.message || "")) {
-      return error(res, 400, "Uno de los videos pesa más de 15MB");
-    }
-    return error(res, 400, "No se pudo leer el formulario");
-  }
+  const body = cuerpo(req);
+  const providerId = String(body.provider_id || "").trim();
 
-  const providerId = (campos.provider_id || "").trim();
-
-  let oficios;
-  try {
-    oficios = JSON.parse(campos.oficios || "[]");
-  } catch {
-    oficios = [];
+  let oficios = body.oficios;
+  if (typeof oficios === "string") {
+    try { oficios = JSON.parse(oficios); } catch { oficios = []; }
   }
   if (!Array.isArray(oficios)) oficios = [];
 
@@ -39,9 +29,6 @@ export default async function handler(req, res) {
     return error(res, 400, "Faltan datos para completar el registro");
   }
 
-  /* El PHP solo verificaba que el trabajador existiera: cualquiera que supiera
-     un provider_id podía cargarle oficios al perfil de otro. Acá además tiene
-     que ser el dueño de la sesión. */
   const sesion = leerSesion(req);
   if (!sesion || sesion.tipo !== "trabajador" || sesion.id !== providerId) {
     return error(res, 403, "No encontramos tu registro de la Parte 1");
@@ -54,8 +41,12 @@ export default async function handler(req, res) {
     return error(res, 404, "No encontramos tu registro de la Parte 1");
   }
 
-  /* 1. Validar todo antes de subir un solo byte (igual que el PHP) */
   const limpios = [];
+  const nombreOk = new RegExp(
+    `^${escapeRegex(providerId)}-[a-f0-9]+\\.(jpg|jpeg|png|webp|mp4|webm|mov)$`,
+    "i"
+  );
+
   for (const o of oficios) {
     const rubro = (o?.rubro || "").trim();
     const descripcion = (o?.descripcion || "").trim();
@@ -75,50 +66,48 @@ export default async function handler(req, res) {
       .map((c) => String(c).trim())
       .filter((c) => c.length > 0 && c.length <= 150);
 
-    limpios.push({ rubro, oficios: nombres, certificaciones: certs, descripcion: descripcion || null });
-  }
-
-  /* 2. Juntar y validar los archivos (media_{i}_{j}, igual que el PHP) */
-  const archivosPorOficio = [];
-  for (let i = 0; i < limpios.length; i++) {
-    const lista = [];
-    let j = 0;
-
-    while (archivos[`media_${i}_${j}`]) {
-      const a = archivos[`media_${i}_${j}`];
-      j++;
-      if (!a.size) continue;
-
-      if (lista.length >= MAX_ARCHIVOS_POR_OFICIO) {
-        return error(res, 400,
-          `Como máximo se pueden subir ${MAX_ARCHIVOS_POR_OFICIO} archivos por oficio`);
+    const media = [];
+    let fotos = 0;
+    let videos = 0;
+    for (const m of Array.isArray(o?.media) ? o.media : []) {
+      const archivo = String(m?.archivo || "").trim();
+      if (!archivo) continue;
+      if (!nombreOk.test(archivo)) {
+        return error(res, 400, "Uno de los archivos no es válido");
       }
-
-      if (TIPOS_FOTO[a.mimetype]) {
-        if (a.size > MAX_FOTO) return error(res, 400, "Una de las fotos pesa más de 3MB");
-        lista.push({ tipo: "foto", archivo: a, ext: TIPOS_FOTO[a.mimetype], bucket: BUCKETS.fotosTrabajo });
-      } else if (TIPOS_VIDEO[a.mimetype]) {
-        if (a.size > MAX_VIDEO) return error(res, 400, "Uno de los videos pesa más de 15MB");
-        lista.push({ tipo: "video", archivo: a, ext: TIPOS_VIDEO[a.mimetype], bucket: BUCKETS.videosTrabajo });
+      const ext = archivo.split(".").pop().toLowerCase();
+      const tipo = EXT_FOTO[ext] || EXT_VIDEO[ext];
+      if (!tipo) return error(res, 400, "Uno de los archivos no es un formato permitido");
+      if (tipo === "foto") {
+        fotos++;
+        if (fotos > MAX_FOTOS_POR_OFICIO) {
+          return error(res, 400, `Como máximo se pueden subir ${MAX_FOTOS_POR_OFICIO} fotos por oficio`);
+        }
       } else {
-        return error(res, 400, "Uno de los archivos no es un formato de foto o video permitido");
+        videos++;
+        if (videos > MAX_VIDEOS_POR_OFICIO) {
+          return error(res, 400, "Como máximo se puede subir 1 video por oficio");
+        }
       }
+      media.push({
+        tipo,
+        archivo,
+        bucket: tipo === "video" ? BUCKETS.videosTrabajo : BUCKETS.fotosTrabajo
+      });
     }
 
-    archivosPorOficio.push(lista);
+    limpios.push({
+      rubro,
+      oficios: nombres,
+      certificaciones: certs,
+      descripcion: descripcion || null,
+      media
+    });
   }
 
-  /* 3. Subir y escribir.
-   *
-   * Las filas van en una transacción, igual que el beginTransaction/commit del
-   * PHP. Los archivos no pueden entrar en la transacción — viven en Storage —
-   * así que si algo falla se borran a mano, como hacía el @unlink del rollback. */
-  const subidos = [];
   try {
     await sql.begin(async (tx) => {
-      for (let i = 0; i < limpios.length; i++) {
-        const o = limpios[i];
-
+      for (const o of limpios) {
         const [fila] = await tx`
           INSERT INTO oficios (provider_id, rubro, oficio, certificaciones, descripcion)
           VALUES (
@@ -129,24 +118,22 @@ export default async function handler(req, res) {
           RETURNING id
         `;
 
-        for (const a of archivosPorOficio[i]) {
-          const sub = await subir(a.bucket, a.archivo, a.ext, providerId);
-          subidos.push({ bucket: a.bucket, nombre: sub.archivo });
-
+        for (const m of o.media) {
           await tx`
             INSERT INTO oficios_media (oficio_id, tipo, archivo)
-            VALUES (${fila.id}, ${a.tipo}, ${sub.archivo})
+            VALUES (${fila.id}, ${m.tipo}, ${m.archivo})
           `;
         }
       }
     });
   } catch (e) {
     console.error("guardar_oficios:", e);
-    for (const s of subidos) await borrar(s.bucket, s.nombre);
+    for (const o of limpios) {
+      for (const m of o.media) await borrar(m.bucket, m.archivo);
+    }
     return error(res, 500, "No se pudo guardar el registro");
   }
 
-  // El PHP refrescaba la sesión acá (quien venía de la Parte 1 ya queda logueado)
   crearCookie(res, {
     tipo: "trabajador",
     id: providerId,
@@ -154,4 +141,8 @@ export default async function handler(req, res) {
   });
 
   json(res, 200, { ok: true, cantidad: limpios.length });
+}
+
+function escapeRegex(texto) {
+  return texto.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }

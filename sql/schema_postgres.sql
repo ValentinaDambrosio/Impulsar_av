@@ -23,6 +23,12 @@ CREATE TYPE estudios_nivel AS ENUM ('primario', 'secundario', 'terciario', 'univ
 CREATE TYPE media_tipo     AS ENUM ('foto', 'video');
 CREATE TYPE cuenta_tipo    AS ENUM ('trabajador', 'usuario');
 CREATE TYPE contacto_tipo  AS ENUM ('llamada', 'whatsapp', 'email', 'instagram');
+CREATE TYPE seguimiento_estado AS ENUM (
+    'pendiente_contacto',
+    'pendiente_trabajo',
+    'pendiente_calificacion',
+    'finalizado'
+);
 
 -- ─────────────────────────── tablas ───────────────────────────
 
@@ -38,6 +44,7 @@ CREATE TABLE IF NOT EXISTS trabajadores (
     estudios      estudios_nivel NOT NULL,
     foto          varchar(255),
     password_hash varchar(255)   NOT NULL,
+    seguimientos_habilitados boolean NOT NULL DEFAULT true,
     created_at    timestamptz    NOT NULL DEFAULT now()
 );
 
@@ -47,6 +54,7 @@ CREATE TABLE IF NOT EXISTS usuarios (
     apellido      varchar(100) NOT NULL,
     email         varchar(150) NOT NULL UNIQUE,
     password_hash varchar(255) NOT NULL,
+    seguimientos_habilitados boolean NOT NULL DEFAULT true,
     created_at    timestamptz  NOT NULL DEFAULT now()
 );
 
@@ -119,6 +127,21 @@ CREATE TABLE IF NOT EXISTS contactos (
     created_at  timestamptz   NOT NULL DEFAULT now()
 );
 
+CREATE TABLE IF NOT EXISTS seguimientos (
+    id                 integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    provider_id        varchar(100) NOT NULL
+                       REFERENCES trabajadores(provider_id) ON DELETE CASCADE,
+    contactante_tipo   cuenta_tipo NOT NULL,
+    contactante_id     varchar(150) NOT NULL,
+    contactante_email  varchar(150) NOT NULL,
+    contactante_nombre varchar(200) NOT NULL,
+    estado             seguimiento_estado NOT NULL DEFAULT 'pendiente_contacto',
+    proxima_fecha      timestamptz NOT NULL,
+    email_enviado      boolean NOT NULL DEFAULT false,
+    created_at         timestamptz NOT NULL DEFAULT now(),
+    updated_at         timestamptz NOT NULL DEFAULT now()
+);
+
 -- ─────────────────────────── índices ───────────────────────────
 -- En MySQL iban adentro del CREATE TABLE; en Postgres van aparte.
 
@@ -129,6 +152,10 @@ CREATE INDEX IF NOT EXISTS idx_token           ON password_resets (token);
 CREATE INDEX IF NOT EXISTS idx_termino         ON busquedas (termino);
 CREATE INDEX IF NOT EXISTS idx_vistas_provider ON vistas_perfil (provider_id);
 CREATE INDEX IF NOT EXISTS idx_contactos_provider ON contactos (provider_id);
+CREATE INDEX IF NOT EXISTS idx_seguimientos_contactante
+    ON seguimientos (contactante_tipo, contactante_id);
+CREATE INDEX IF NOT EXISTS idx_seguimientos_proxima
+    ON seguimientos (proxima_fecha, estado);
 
 -- El panel agrupa las vistas por día sobre los últimos 30 días.
 -- Con esto no hace un scan completo de la tabla.
@@ -150,5 +177,6 @@ ALTER TABLE password_resets ENABLE ROW LEVEL SECURITY;
 ALTER TABLE busquedas       ENABLE ROW LEVEL SECURITY;
 ALTER TABLE vistas_perfil   ENABLE ROW LEVEL SECURITY;
 ALTER TABLE contactos       ENABLE ROW LEVEL SECURITY;
+ALTER TABLE seguimientos    ENABLE ROW LEVEL SECURITY;
 
 COMMIT;

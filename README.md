@@ -3,7 +3,7 @@
 Directorio de oficios del barrio. Frontend estático + funciones serverless en
 **Vercel**, con **Supabase** (PostgreSQL + Storage) como base.
 
-Antes esto era PHP + MySQL sobre Apache. La lógica es la misma: los 18 endpoints
+Antes esto era PHP + MySQL sobre Apache. La lógica es la misma: los endpoints
 de `api/` hacen lo mismo que hacían los `.php`, devuelven el mismo JSON y los
 mismos códigos de error. Lo que cambió es dónde corre.
 
@@ -24,13 +24,15 @@ api/
     validar.js               las validaciones de los formularios
     http.js                  helpers de request/response + IP real
     make.js                  webhook de los mails
+    seguimiento.js           popup y mails post-contacto
 sql/schema_postgres.sql      el esquema traducido de MySQL
+sql/seguimientos.sql         alta de la feature si el esquema ya existía
 migracion/                   MySQL → Supabase, para los datos que ya existen
 ```
 
 Vercel sirve los `.html` como archivos estáticos y publica `api/[ruta].js` como
 **una sola función** que atiende todas las rutas `/api/...`. Es así porque el
-plan Hobby no deja más de 12 funciones por deploy y los endpoints son 18. Las
+plan Hobby no deja más de 12 funciones por deploy y hay más de 12 rutas. Las
 carpetas que empiezan con `_` Vercel no las publica: son código común.
 
 Para agregar un endpoint: crear el archivo en `api/_endpoints/` y sumarlo al
@@ -55,7 +57,7 @@ del `CREATE TABLE` pasaron a `CREATE INDEX` aparte). Ver `sql/schema_postgres.sq
 
 ## Variables de entorno
 
-Copiar `.env.example` y completar. Las cinco primeras van sí o sí:
+Copiar `.env.example` y completar. Las de DATABASE/SUPABASE/SESSION van sí o sí:
 
 | Variable | De dónde sale |
 |---|---|
@@ -64,7 +66,8 @@ Copiar `.env.example` y completar. Las cinco primeras van sí o sí:
 | `SUPABASE_SERVICE_ROLE_KEY` | Supabase → API → `service_role` |
 | `SESSION_SECRET` | `node -e "console.log(require('crypto').randomBytes(48).toString('base64url'))"` |
 | `MAKE_WEBHOOK_URL` | el webhook de Make (opcional: sin esto no salen los mails) |
-| `SITE_URL` | el dominio, para armar el link de recuperación |
+| `SITE_URL` | el dominio, para armar el link de recuperación y los de seguimiento |
+| `CRON_SECRET` | clave para que Make pida `/api/seguimientos_para_email?clave=...` |
 
 ⚠️ La `service_role` saltea la seguridad de la base. Va solo en las variables de
 Vercel, nunca en `js/`.
@@ -75,6 +78,8 @@ Vercel, nunca en `js/`.
 2. Correr `sql/schema_postgres.sql` en el SQL Editor.
 3. Correr `sql/storage_buckets.sql`: crea los tres buckets públicos
    (`fotos-perfil`, `fotos-trabajo`, `videos-trabajo`) con sus límites.
+   Si el esquema ya estaba aplicado sin seguimientos, correr también
+   `sql/seguimientos.sql`.
 4. Importar el repo en Vercel y cargar las variables de entorno.
 5. Migrar los datos que ya existen (abajo).
 6. Deploy.
@@ -120,13 +125,8 @@ Verificado: `bcryptjs` acepta el prefijo `$2y$` de PHP sin tocar nada.
 
 ## Lo que quedó afuera, a propósito
 
-- **`seguimientos`.** `log_contacto.php` escribía en una tabla que no está en
-  `sql/schema_completo.sql`, `js/seguimientos.js` llamaba a un
-  `api/seguimientos_pendientes.php` que no está en el repo, y
-  `firmarRespuestaEmail()` en `db.php` no la usaba nadie. Es una feature a medio
-  hacer: no hay esquema del que partir y no me pareció bien inventarlo.
-- **`js/main.js`.** `index.html` lo cargaba pero el archivo nunca estuvo en el
-  repo (tiraba 404). Se sacó el `<script>`.
+- **`js/main.js`.** `index.html` del zip lo cargaba pero el archivo nunca estuvo
+  en el repo (tiraba 404). Se sacó el `<script>`.
 - **`uploads/`.** Se deja en el repo a propósito: es la fuente de la migración a
   Storage. Una vez migrado y verificado, se puede borrar en un commit aparte.
 
@@ -139,7 +139,7 @@ siendo visibles en cualquier clon del repo. **Hay que rotar el webhook en Make.*
 ## Qué falta probar
 
 Nada de esto se probó corriendo: no hay MySQL ni Postgres en la máquina donde se
-escribió. Sí está verificado que los 18 endpoints cargan sin errores de import,
+escribió. Sí está verificado que los endpoints de `/api` cargan sin errores de import,
 que la firma de las cookies rechaza payloads alterados, y que `bcryptjs` lee los
 hash de PHP.
 
@@ -151,3 +151,5 @@ Recorrido para la primera prueba real:
 4. Perfil: media, calificar, intentar calificar dos veces (tiene que rebotar)
 5. Panel: estadísticas, editar perfil, cambiar foto, borrar un oficio
 6. Registro de usuario común desde el modal
+7. Contacto logueado → a los 5 días (o adelantando `proxima_fecha` en la base)
+   tiene que aparecer el popup de seguimiento

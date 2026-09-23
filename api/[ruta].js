@@ -1,7 +1,7 @@
 /* Única función serverless del proyecto: reparte cada /api/<ruta> a su endpoint.
  *
  * Por qué una sola: el plan Hobby de Vercel no deja más de 12 funciones por
- * deploy, y los endpoints son 18. Vercel ignora las carpetas que empiezan con
+ * deploy, y los endpoints son más de 12. Vercel ignora las carpetas que empiezan con
  * guion bajo, así que api/_endpoints/ y api/_lib/ son código común y no
  * funciones. Las URLs no cambian: /api/login sigue siendo /api/login.
  *
@@ -32,8 +32,13 @@ import registro from "./_endpoints/registro.js";
 import registro_usuario from "./_endpoints/registro_usuario.js";
 import resetear_password from "./_endpoints/resetear_password.js";
 import session_check from "./_endpoints/session_check.js";
+import seguimiento_responder from "./_endpoints/seguimiento_responder.js";
+import seguimiento_responder_email from "./_endpoints/seguimiento_responder_email.js";
+import seguimientos_para_email from "./_endpoints/seguimientos_para_email.js";
+import seguimientos_pendientes from "./_endpoints/seguimientos_pendientes.js";
 import solicitar_reset from "./_endpoints/solicitar_reset.js";
 import submit_rating from "./_endpoints/submit_rating.js";
+import url_subida from "./_endpoints/url_subida.js";
 
 const RUTAS = {
   actualizar_perfil,
@@ -52,8 +57,13 @@ const RUTAS = {
   registro_usuario,
   resetear_password,
   session_check,
+  seguimiento_responder,
+  seguimiento_responder_email,
+  seguimientos_para_email,
+  seguimientos_pendientes,
   solicitar_reset,
-  submit_rating
+  submit_rating,
+  url_subida
 };
 
 export default async function handler(req, res) {

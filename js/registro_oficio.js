@@ -25,9 +25,10 @@ document.addEventListener("DOMContentLoaded", () => {
   const btnFinalizar = document.getElementById("btnFinalizar");
   const mensaje = document.getElementById("formMensajeOficios");
 
-  const MAX_ARCHIVOS = 10;
+  const MAX_FOTOS = 4;
+  const MAX_VIDEOS = 1;
   const MAX_FOTO_BYTES = 3 * 1024 * 1024;
-  const MAX_VIDEO_BYTES = 15 * 1024 * 1024;
+  const MAX_VIDEO_BYTES = 8 * 1024 * 1024;
 
   const oficiosAgregados = []; 
   let archivosSeleccionados = []; 
@@ -38,20 +39,33 @@ document.addEventListener("DOMContentLoaded", () => {
     const nuevos = Array.from(inputMediaTrabajo.files);
     let mensajeError = "";
 
+    const fotosYa = archivosSeleccionados.filter((a) => a.type.startsWith("image/")).length;
+    const videosYa = archivosSeleccionados.filter((a) => a.type.startsWith("video/")).length;
+    let fotosNuevas = 0;
+    let videosNuevos = 0;
+
     for (const archivo of nuevos) {
-      if (archivosSeleccionados.length >= MAX_ARCHIVOS) {
-        mensajeError = `Podés subir hasta ${MAX_ARCHIVOS} archivos por oficio.`;
-        break;
-      }
       const esVideo = archivo.type.startsWith("video/");
+      if (esVideo) {
+        if (videosYa + videosNuevos >= MAX_VIDEOS) {
+          mensajeError = "Podés subir 1 video por oficio.";
+          continue;
+        }
+      } else if (fotosYa + fotosNuevas >= MAX_FOTOS) {
+        mensajeError = `Podés subir hasta ${MAX_FOTOS} fotos por oficio.`;
+        continue;
+      }
+
       const limite = esVideo ? MAX_VIDEO_BYTES : MAX_FOTO_BYTES;
       if (archivo.size > limite) {
         mensajeError = esVideo
-          ? `"${archivo.name}" pesa demasiado (máximo 15MB para videos).`
+          ? `"${archivo.name}" pesa demasiado (máximo 8MB para videos).`
           : `"${archivo.name}" pesa demasiado (máximo 3MB para fotos).`;
         continue;
       }
       archivosSeleccionados.push(archivo);
+      if (esVideo) videosNuevos++;
+      else fotosNuevas++;
     }
 
     inputMediaTrabajo.value = "";
@@ -308,54 +322,84 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const textoBotonFinalizar = vieneDelPanel ? "Guardar y volver a mi panel" : "Finalizar registro";
 
+  async function leerJson(res) {
+    const texto = await res.text();
+    let data = {};
+    try {
+      data = texto ? JSON.parse(texto) : {};
+    } catch {
+      if (res.status === 413) {
+        throw new Error("Los archivos pesan demasiado. Probá con un video más liviano o menos fotos.");
+      }
+      throw new Error("No se pudo completar el pedido. Probá de nuevo.");
+    }
+    if (!res.ok) throw new Error(data.error || "Error desconocido");
+    return data;
+  }
+
+  async function subirArchivoAStorage(archivo) {
+    const prep = await fetch("api/url_subida", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ contentType: archivo.type, size: archivo.size })
+    }).then(leerJson);
+
+    const put = await fetch(prep.signedUrl, {
+      method: "PUT",
+      headers: { "Content-Type": prep.contentType || archivo.type },
+      body: archivo
+    });
+
+    if (!put.ok) throw new Error(`No se pudo subir "${archivo.name}"`);
+    return { tipo: prep.tipo, archivo: prep.archivo };
+  }
+
   btnFinalizar.addEventListener("click", () => {
     mensaje.textContent = "";
     mensaje.className = "form-mensaje";
     btnFinalizar.disabled = true;
     btnFinalizar.textContent = "Guardando...";
 
-    const metaData = oficiosAgregados.map((o) => ({
-      rubro: o.rubro,
-      oficios: o.oficios,
-      certificaciones: o.certificaciones,
-      descripcion: o.descripcion
-    }));
+    (async () => {
+      const oficios = [];
 
-    const datos = new FormData();
-    datos.append("provider_id", providerId);
-    datos.append("oficios", JSON.stringify(metaData));
+      for (const o of oficiosAgregados) {
+        const media = [];
+        for (let i = 0; i < o.mediaFiles.length; i++) {
+          btnFinalizar.textContent = `Subiendo archivo ${i + 1} de ${o.mediaFiles.length}...`;
+          media.push(await subirArchivoAStorage(o.mediaFiles[i]));
+        }
+        oficios.push({
+          rubro: o.rubro,
+          oficios: o.oficios,
+          certificaciones: o.certificaciones,
+          descripcion: o.descripcion,
+          media
+        });
+      }
 
-    oficiosAgregados.forEach((o, i) => {
-      o.mediaFiles.forEach((archivo, j) => {
-        datos.append(`media_${i}_${j}`, archivo);
-      });
+      btnFinalizar.textContent = "Guardando...";
+
+      await fetch("api/guardar_oficios", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ provider_id: providerId, oficios })
+      }).then(leerJson);
+
+      const destino = vieneDelPanel ? "panel.html" : "index.html";
+      mensaje.textContent = vieneDelPanel
+        ? "¡Listo! Se agregó a tu perfil. Te llevamos de vuelta a tu panel..."
+        : "¡Listo! Tu registro se completó con éxito. Te llevamos al inicio...";
+      mensaje.className = "form-mensaje exito";
+      sessionStorage.removeItem("provider_id");
+      setTimeout(() => {
+        window.location.href = destino;
+      }, 2000);
+    })().catch((err) => {
+      mensaje.textContent = err.message;
+      mensaje.className = "form-mensaje error";
+      btnFinalizar.disabled = false;
+      btnFinalizar.textContent = textoBotonFinalizar;
     });
-
-    fetch("api/guardar_oficios", {
-      method: "POST",
-      body: datos
-    })
-      .then(async (res) => {
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || "Error desconocido");
-        return data;
-      })
-      .then(() => {
-        const destino = vieneDelPanel ? "panel.html" : "index.html";
-        mensaje.textContent = vieneDelPanel
-          ? "¡Listo! Se agregó a tu perfil. Te llevamos de vuelta a tu panel..."
-          : "¡Listo! Tu registro se completó con éxito. Te llevamos al inicio...";
-        mensaje.className = "form-mensaje exito";
-        sessionStorage.removeItem("provider_id");
-        setTimeout(() => {
-          window.location.href = destino;
-        }, 2000);
-      })
-      .catch((err) => {
-        mensaje.textContent = err.message;
-        mensaje.className = "form-mensaje error";
-        btnFinalizar.disabled = false;
-        btnFinalizar.textContent = textoBotonFinalizar;
-      });
   });
 });

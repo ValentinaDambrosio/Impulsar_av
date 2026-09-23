@@ -37,8 +37,10 @@ export const TIPOS_VIDEO = {
 };
 
 export const MAX_FOTO = 3 * 1024 * 1024;
-export const MAX_VIDEO = 15 * 1024 * 1024;
-export const MAX_ARCHIVOS_POR_OFICIO = 10;
+export const MAX_VIDEO = 8 * 1024 * 1024;
+export const MAX_FOTOS_POR_OFICIO = 4;
+export const MAX_VIDEOS_POR_OFICIO = 1;
+export const MAX_ARCHIVOS_POR_OFICIO = MAX_FOTOS_POR_OFICIO + MAX_VIDEOS_POR_OFICIO;
 
 /* Lee un formulario multipart directo del stream del pedido.
    Vercel solo parsea req.body cuando alguien lo lee: mientras nadie lo toque
@@ -103,4 +105,22 @@ export async function borrar(bucket, nombre) {
 export function urlPublica(bucket, nombre) {
   if (!nombre) return null;
   return supabase.storage.from(bucket).getPublicUrl(nombre).data.publicUrl;
+}
+
+/* URL firmada para que el navegador suba directo a Storage.
+   Vercel (Hobby) rechaza con 413 cualquier pedido de más de ~4.5MB, y un
+   video de varios MB no pasa por la función. El archivo ni toca el serverless. */
+export async function urlSubidaFirmada(bucket, ext, prefijo, contentType) {
+  const nombre = `${prefijo}-${nombreAlAzar()}.${ext}`;
+  const { data, error } = await supabase.storage
+    .from(bucket)
+    .createSignedUploadUrl(nombre);
+
+  if (error) throw new Error(`No se pudo preparar la subida: ${error.message}`);
+
+  return {
+    archivo: nombre,
+    signedUrl: data.signedUrl,
+    contentType
+  };
 }

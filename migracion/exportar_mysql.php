@@ -43,6 +43,17 @@ $usuarios = todo($pdo, "
     FROM usuarios ORDER BY created_at ASC
 ");
 
+$seguimientos = [];
+try {
+    $seguimientos = todo($pdo, "
+        SELECT id, provider_id, contactante_tipo, contactante_id, contactante_email,
+               contactante_nombre, estado, proxima_fecha, email_enviado, created_at, updated_at
+        FROM seguimientos ORDER BY id ASC
+    ");
+} catch (Exception $e) {
+    /* bases viejas sin la tabla */
+}
+
 $oficios = todo($pdo, "
     SELECT id, provider_id, rubro, oficio, certificaciones, descripcion, created_at
     FROM oficios ORDER BY id ASC
@@ -92,7 +103,8 @@ echo json_encode([
     "ratings"      => $ratings,
     "vistas"       => $vistas,
     "contactos"    => $contactos,
-    "busquedas"    => $busquedas
+    "busquedas"    => $busquedas,
+    "seguimientos" => $seguimientos
 ], JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
 
 fwrite(STDERR, sprintf(
