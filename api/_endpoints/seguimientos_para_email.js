@@ -49,9 +49,9 @@ export default async function handler(req, res) {
       trabajador: nombreTrabajador,
       pregunta: pregunta.pregunta,
       opciones,
-      link_perfil: seguimiento.estado === "pendiente_trabajo"
-        ? null
-        : `${base}/perfil.html?id=${seguimiento.provider_id}`
+      link_perfil: seguimiento.estado === "pendiente_calificacion"
+        ? `${base}/perfil.html?id=${seguimiento.provider_id}`
+        : null
     });
 
     idsAMarcar.push(seguimiento.id);
