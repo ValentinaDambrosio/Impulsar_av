@@ -4,7 +4,9 @@ const Auth = {
   logueado: false,
   tipo: null,
   nombre: null,
-  accionPendiente: null
+  id: null,
+  accionPendiente: null,
+  listo: null
 
 };
 
@@ -164,7 +166,7 @@ function inyectarModalLogin() {
         return data;
       })
       .then((data) => {
-        aplicarSesion(true, data.tipo, data.nombre);
+        aplicarSesion(true, data.tipo, data.nombre, data.id);
         ocultarModalLogin();
         ejecutarAccionPendiente();
       })
@@ -204,7 +206,7 @@ function inyectarModalLogin() {
         return data;
       })
       .then((data) => {
-        aplicarSesion(true, data.tipo, data.nombre);
+        aplicarSesion(true, data.tipo, data.nombre, data.id);
         ocultarModalLogin();
         ejecutarAccionPendiente();
       })
@@ -234,10 +236,11 @@ function ejecutarAccionPendiente() {
 }
 
 
-function aplicarSesion(logueado, tipo, nombre) {
+function aplicarSesion(logueado, tipo, nombre, id) {
   Auth.logueado = logueado;
   Auth.tipo = tipo || null;
   Auth.nombre = nombre || null;
+  Auth.id = id || null;
   actualizarNavbar();
 }
 
@@ -302,7 +305,7 @@ function verificarSesion() {
   return fetch("api/session_check")
     .then((res) => res.json())
     .then((data) => {
-      aplicarSesion(data.logueado, data.tipo, data.nombre);
+      aplicarSesion(data.logueado, data.tipo, data.nombre, data.id);
     })
     .catch(() => aplicarSesion(false));
 }
@@ -341,7 +344,9 @@ document.addEventListener("click", (e) => {
 
 document.addEventListener("DOMContentLoaded", () => {
   inyectarModalLogin();
-  verificarSesion();
+  /* Otras páginas (ej. perfil.js) pueden esperar esta promesa para saber
+     si el usuario está logueado antes de decidir qué mostrar. */
+  Auth.listo = verificarSesion();
 });
 
 window.addEventListener("pageshow", (e) => {

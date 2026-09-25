@@ -52,5 +52,5 @@ export default async function handler(req, res) {
   const nombreCompleto = `${nombre} ${apellido}`;
   crearCookie(res, { tipo: "usuario", id: usuario.id, nombre: nombreCompleto });
 
-  json(res, 200, { ok: true, tipo: "usuario", nombre: nombreCompleto });
+  json(res, 200, { ok: true, tipo: "usuario", nombre: nombreCompleto, id: usuario.id });
 }

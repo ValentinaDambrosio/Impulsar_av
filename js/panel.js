@@ -252,6 +252,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
           document.getElementById("linkAgregarOficio").href =
             `registro_oficio.html?id=${encodeURIComponent(data.trabajador.provider_id)}`;
+
+          if (window.location.hash === "#editarPerfilSeccion") {
+            document.getElementById("editarPerfilSeccion")
+              .scrollIntoView({ behavior: "smooth", block: "start" });
+          }
         })
         .catch((err) => {
           estado.hidden = false;

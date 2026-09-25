@@ -24,7 +24,7 @@ export default async function handler(req, res) {
   if (trabajador && await bcrypt.compare(password, trabajador.password_hash)) {
     const nombre = `${trabajador.nombre} ${trabajador.apellido}`;
     crearCookie(res, { tipo: "trabajador", id: trabajador.provider_id, nombre });
-    return json(res, 200, { ok: true, tipo: "trabajador", nombre });
+    return json(res, 200, { ok: true, tipo: "trabajador", nombre, id: trabajador.provider_id });
   }
 
   const [usuario] = await sql`
@@ -35,7 +35,7 @@ export default async function handler(req, res) {
   if (usuario && await bcrypt.compare(password, usuario.password_hash)) {
     const nombre = `${usuario.nombre} ${usuario.apellido}`;
     crearCookie(res, { tipo: "usuario", id: usuario.id, nombre });
-    return json(res, 200, { ok: true, tipo: "usuario", nombre });
+    return json(res, 200, { ok: true, tipo: "usuario", nombre, id: usuario.id });
   }
 
   // Un solo mensaje para los dos casos: decir cuál falló le confirmaría a

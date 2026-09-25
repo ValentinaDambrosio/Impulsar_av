@@ -64,7 +64,7 @@ function armarOficioSeccion(oficio) {
     </div>`;
 }
 
-function armarPagina(p) {
+function armarPagina(p, esPropio) {
   const nombreCompleto = escapeHtml(`${p.nombre} ${p.apellido}`);
   const telDigitos = (p.celular || "").replace(/[^0-9]/g, "");
   const urlInstagram = armarUrlInstagram(p.instagram);
@@ -77,12 +77,16 @@ function armarPagina(p) {
     p.oficios.flatMap((o) => o.oficios.map((nombre) => escapeHtml(nombre))).join(" · ") ||
     "Todavía no cargó un oficio";
 
+  const iconoEditar = esPropio
+    ? `<a href="panel.html#editarPerfilSeccion" class="perfil-editar-link" aria-label="Editar mi perfil" title="Editar mi perfil"><i class="fas fa-pen"></i></a>`
+    : "";
+
   return `
     <div class="perfil-header" data-id="${p.provider_id}">
       <img class="perfil-avatar" src="${fotoUrl}" alt="${nombreCompleto}">
 
       <div class="perfil-info">
-        <h1 class="perfil-nombre">${nombreCompleto}</h1>
+        <h1 class="perfil-nombre">${nombreCompleto}${iconoEditar}</h1>
         <p class="perfil-oficio-resumen">${oficiosResumen}</p>
 
         <div class="perfil-rating-row">
@@ -227,14 +231,21 @@ document.addEventListener("DOMContentLoaded", () => {
     return;
   }
 
-  fetch(`api/get_perfil?id=${encodeURIComponent(id)}`)
-    .then(async (res) => {
+  Promise.all([
+    fetch(`api/get_perfil?id=${encodeURIComponent(id)}`).then(async (res) => {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "No encontramos ese perfil");
       return data;
-    })
-    .then((data) => {
-      contenedor.innerHTML = armarPagina(data);
+    }),
+    /* Espera a que auth.js termine de chequear la sesión, para saber si este
+       es el propio perfil del trabajador logueado. */
+    Auth.listo || Promise.resolve()
+  ])
+    .then(([data]) => {
+      const esPropio =
+        Auth.logueado && Auth.tipo === "trabajador" && String(Auth.id) === String(data.provider_id);
+
+      contenedor.innerHTML = armarPagina(data, esPropio);
       conectarCalificar(data.provider_id);
       conectarCopiarEmail();
       conectarVideos();
