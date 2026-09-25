@@ -941,6 +941,75 @@ img {
     border-radius: 10px;
 }
 
+/* Lightbox: popup para ver fotos y videos ampliados */
+
+body.media-lightbox-abierto {
+    overflow: hidden;
+}
+
+.media-lightbox-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 500;
+    background: rgba(0, 0, 0, 0.88);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+}
+
+.media-lightbox-overlay[hidden] {
+    display: none;
+}
+
+.media-lightbox-cuerpo {
+    max-width: min(900px, 100%);
+    max-height: 100%;
+}
+
+.media-lightbox-cuerpo img,
+.media-lightbox-cuerpo video {
+    display: block;
+    max-width: 100%;
+    max-height: 85vh;
+    border-radius: 10px;
+    margin: 0 auto;
+    object-fit: contain;
+}
+
+.media-lightbox-cerrar {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    width: 44px;
+    height: 44px;
+    border: none;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.12);
+    color: #fff;
+    font-size: 1.2rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s;
+}
+
+.media-lightbox-cerrar:hover {
+    background: rgba(255, 255, 255, 0.25);
+}
+
+@media (max-width: 600px) {
+    .media-lightbox-overlay {
+        padding: 20px 12px;
+    }
+
+    .media-lightbox-cerrar {
+        top: 10px;
+        right: 10px;
+    }
+}
+
 .preview-media-lista {
     display: flex;
     flex-wrap: wrap;

@@ -27,7 +27,7 @@ function armarUrlInstagram(valor) {
 function armarMediaHtml(item) {
   if (item.tipo === "video") {
     return `
-      <div class="media-item media-video" data-src="${item.url}">
+      <div class="media-item media-video" data-src="${item.url}" data-tipo="video">
         <video muted preload="metadata">
           <source src="${item.url}#t=0.1">
         </video>
@@ -35,7 +35,7 @@ function armarMediaHtml(item) {
       </div>`;
   }
   return `
-    <div class="media-item">
+    <div class="media-item" data-src="${item.url}" data-tipo="foto">
       <img src="${item.url}" alt="Foto del trabajo" loading="lazy">
     </div>`;
 }
@@ -206,16 +206,62 @@ function conectarCopiarEmail() {
 }
 
 
-function conectarVideos() {
-  document.querySelectorAll(".media-video").forEach((item) => {
-    item.addEventListener("click", () => {
-      const src = item.dataset.src;
-      const video = document.createElement("video");
-      video.src = src;
-      video.controls = true;
-      video.autoplay = true;
-      video.className = "media-video-abierto";
-      item.replaceWith(video);
+function inyectarLightbox() {
+  if (document.getElementById("mediaLightbox")) return;
+
+  const lightbox = document.createElement("div");
+  lightbox.id = "mediaLightbox";
+  lightbox.className = "media-lightbox-overlay";
+  lightbox.hidden = true;
+  lightbox.innerHTML = `
+    <button type="button" class="media-lightbox-cerrar" id="mediaLightboxCerrar" aria-label="Cerrar">
+      <i class="fas fa-times"></i>
+    </button>
+    <div class="media-lightbox-cuerpo" id="mediaLightboxCuerpo"></div>
+  `;
+  document.body.appendChild(lightbox);
+
+  document.getElementById("mediaLightboxCerrar").addEventListener("click", cerrarLightbox);
+
+  // Cerrar al hacer click afuera del contenido (en el fondo)
+  lightbox.addEventListener("click", (e) => {
+    if (e.target === lightbox) cerrarLightbox();
+  });
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") cerrarLightbox();
+  });
+}
+
+function abrirLightbox(src, tipo) {
+  inyectarLightbox();
+  const cuerpo = document.getElementById("mediaLightboxCuerpo");
+
+  cuerpo.innerHTML =
+    tipo === "video"
+      ? `<video src="${src}" controls autoplay playsinline></video>`
+      : `<img src="${src}" alt="Foto del trabajo ampliada">`;
+
+  document.getElementById("mediaLightbox").hidden = false;
+  document.body.classList.add("media-lightbox-abierto");
+}
+
+function cerrarLightbox() {
+  const lightbox = document.getElementById("mediaLightbox");
+  if (!lightbox || lightbox.hidden) return;
+
+  lightbox.hidden = true;
+  document.body.classList.remove("media-lightbox-abierto");
+  // Vaciar el contenido corta cualquier video que estuviera reproduciéndose
+  document.getElementById("mediaLightboxCuerpo").innerHTML = "";
+}
+
+function conectarMediaLightbox() {
+  document.querySelectorAll(".media-gallery").forEach((galeria) => {
+    galeria.addEventListener("click", (e) => {
+      const item = e.target.closest(".media-item");
+      if (!item) return;
+      abrirLightbox(item.dataset.src, item.dataset.tipo);
     });
   });
 }
@@ -248,7 +294,7 @@ document.addEventListener("DOMContentLoaded", () => {
       contenedor.innerHTML = armarPagina(data, esPropio);
       conectarCalificar(data.provider_id);
       conectarCopiarEmail();
-      conectarVideos();
+      conectarMediaLightbox();
 
       fetch("api/log_vista_perfil", {
         method: "POST",
