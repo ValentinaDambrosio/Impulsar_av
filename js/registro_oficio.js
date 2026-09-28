@@ -386,7 +386,7 @@ document.addEventListener("DOMContentLoaded", () => {
         body: JSON.stringify({ provider_id: providerId, oficios })
       }).then(leerJson);
 
-      const destino = vieneDelPanel ? "panel.html" : "inicio.html";
+      const destino = vieneDelPanel ? "panel.html" : "index.html";
       mensaje.textContent = vieneDelPanel
         ? "¡Listo! Se agregó a tu perfil. Te llevamos de vuelta a tu panel..."
         : "¡Listo! Tu registro se completó con éxito. Te llevamos al inicio...";
