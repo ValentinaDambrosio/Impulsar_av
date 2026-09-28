@@ -297,7 +297,7 @@ function actualizarNavbar() {
 function cerrarSesion() {
   fetch("api/logout", { method: "POST" }).then(() => {
     aplicarSesion(false);
-    window.location.href = "index.html";
+    window.location.href = "inicio.html";
   });
 }
 

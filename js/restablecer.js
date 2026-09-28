@@ -51,7 +51,7 @@ document.addEventListener("DOMContentLoaded", () => {
         mensaje.className = "form-mensaje exito";
         form.querySelector("button").disabled = true;
         setTimeout(() => {
-          window.location.href = "index.html";
+          window.location.href = "inicio.html";
         }, 2000);
       })
       .catch((err) => {

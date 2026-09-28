@@ -12,16 +12,50 @@
         crossorigin="anonymous" 
         referrerpolicy="no-referrer" />
     <link rel="stylesheet" href="css/style.css">
-    <link rel="shortcut icon" href="images/community_icon.svg" type="image/x-icon">
+    <link rel="shortcut icon" href="images/isotipo.svg" type="image/x-icon">
 </head>
 <body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="logo">
+                <a href="inicio.html">
+                    <img src="images/isotipo.ico" alt="logo-immpulsar">                 
+                </a>
+                <a href="https://activajuventudesymilitancia.com.ar/quienes-somos.html">
+                    <img src="images/av-azul.ico" alt="logo-activá">
+                </a>
+            </div>
+ 
+            <button class="hamburger-btn" id="hamburgerBtn" aria-label="Abrir menú" aria-expanded="false">
+                <i class="fas fa-bars"></i>
+            </button>
+ 
+            <div class="navbar-panel" id="navbarPanel">
+ 
+                <div class="main-menu">
+                    <ul>
+                        <li>
+                            <a href="inicio.html">Inicio</a>
+                        </li>
+                        <li>
+                            <a href="bienvenida.html">Acerca de</a>
+                        </li>
+                        <li>
+                            <a href="certificaciones.html">Certificaciones</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </nav>
+    
     <section class="hero">
         <div class="container-sm">
             <div class="form-card">
                 <h1 class="text-xl text-center">Elegí tu nueva contraseña</h1>
 
                 <div id="avisoSinToken" class="form-mensaje error" hidden>
-                    Este link no es válido. <a href="index.html">Volvé al inicio</a>.
+                    Este link no es válido. <a href="inicio.html">Volvé al inicio</a>.
                 </div>
 
                 <form id="formRestablecer" class="registro-form" novalidate>
@@ -43,14 +77,20 @@
     </section>
 
     <footer class="site-footer">
-        <div class="container">
-            <div class="footer-logo">
-                <img src="images/logo.ico" alt="logo Nexo de Tierras Argentinas">
-            </div>
+    <div class="container footer-container">
+        <div class="footer-spacer" aria-hidden="true"></div>
+        <img class="footer-logo" src="images/isologotipo.png" alt="logo">
+        <div class="footer-derecha">
+            <nav class="footer-links">
+                <a href="inicio.html">Inicio</a>
+                <a href="bienvenida.html">Acerca de</a>
+                <a href="certificaciones.html">Certificaciones</a>
+            </nav>
             <div class="footer-contacto">
-                Contacto: <a href="mailto:contacto@nexotierrasargentinas.org">contacto@nexotierrasargentinas.org</a>
+                Contacto: <a href="mailto:impulsar@gmail.com">impulsar@gmail.com</a>
             </div>
         </div>
+    </div>
     </footer>
 
     <script src="js/restablecer.js"></script>

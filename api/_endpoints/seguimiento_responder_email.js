@@ -28,7 +28,7 @@ export default async function handler(req, res) {
 
 function paginaSimple(res, sitio, titulo, mensaje) {
   const css = sitio ? `${sitio}/css/style.css` : "/css/style.css";
-  const home = sitio ? `${sitio}/index.html` : "/index.html";
+  const home = sitio ? `${sitio}/inicio.html` : "/inicio.html";
   const html = `<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>${escapar(titulo)}</title>

@@ -12,7 +12,7 @@ mismos códigos de error. Lo que cambió es dónde corre.
 ## Cómo está armado
 
 ```
-index.html, perfil.html, …   el frontend, HTML/CSS/JS vanilla, sin build
+inicio.html, perfil.html, …   el frontend, HTML/CSS/JS vanilla, sin build
 css/  images/  js/           igual que antes
 api/
   [ruta].js                  la única función: reparte /api/<ruta> al endpoint
@@ -125,7 +125,7 @@ Verificado: `bcryptjs` acepta el prefijo `$2y$` de PHP sin tocar nada.
 
 ## Lo que quedó afuera, a propósito
 
-- **`js/main.js`.** `index.html` del zip lo cargaba pero el archivo nunca estuvo
+- **`js/main.js`.** `inicio.html` del zip lo cargaba pero el archivo nunca estuvo
   en el repo (tiraba 404). Se sacó el `<script>`.
 - **`uploads/`.** Se deja en el repo a propósito: es la fuente de la migración a
   Storage. Una vez migrado y verificado, se puede borrar en un commit aparte.
