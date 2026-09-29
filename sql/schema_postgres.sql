@@ -109,6 +109,7 @@ CREATE TABLE IF NOT EXISTS busquedas (
     id             integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     termino        varchar(150) NOT NULL,
     usuario_nombre varchar(200),
+    origen         varchar(50),
     created_at     timestamptz  NOT NULL DEFAULT now()
 );
 

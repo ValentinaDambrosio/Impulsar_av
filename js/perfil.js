@@ -108,16 +108,18 @@ function armarPagina(p, esPropio) {
       </div>
 
       <div class="perfil-calificar">
-        <span class="perfil-calificar-titulo">Calificar</span>
-        <div class="rate-stars" id="rateStars">
-          <i class="far fa-star" data-value="1"></i>
-          <i class="far fa-star" data-value="2"></i>
-          <i class="far fa-star" data-value="3"></i>
-          <i class="far fa-star" data-value="4"></i>
-          <i class="far fa-star" data-value="5"></i>
-        </div>
-        <button class="btn-enviar" id="btnEnviarReseña" type="button" disabled>Enviar reseña</button>
-        <div class="rate-mensaje" id="rateMensaje"></div>
+        ${esPropio
+          ? '<p class="perfil-calificar-aviso">No podés calificar tu propio perfil.</p>'
+          : `<span class="perfil-calificar-titulo">Calificar</span>
+            <div class="rate-stars" id="rateStars">
+              <i class="far fa-star" data-value="1"></i>
+              <i class="far fa-star" data-value="2"></i>
+              <i class="far fa-star" data-value="3"></i>
+              <i class="far fa-star" data-value="4"></i>
+              <i class="far fa-star" data-value="5"></i>
+            </div>
+            <button class="btn-enviar" id="btnEnviarReseña" type="button" disabled>Enviar reseña</button>
+            <div class="rate-mensaje" id="rateMensaje"></div>`}
       </div>
     </div>
 
@@ -292,7 +294,7 @@ document.addEventListener("DOMContentLoaded", () => {
         Auth.logueado && Auth.tipo === "trabajador" && String(Auth.id) === String(data.provider_id);
 
       contenedor.innerHTML = armarPagina(data, esPropio);
-      conectarCalificar(data.provider_id);
+      if (!esPropio) conectarCalificar(data.provider_id);
       conectarCopiarEmail();
       conectarMediaLightbox();
 

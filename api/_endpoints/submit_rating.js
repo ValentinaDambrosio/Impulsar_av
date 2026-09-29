@@ -8,6 +8,7 @@
 
 import { sql } from "../_lib/db.js";
 import { json, error, cuerpo, soloMetodo, ipDelCliente } from "../_lib/http.js";
+import { leerSesion } from "../_lib/sesion.js";
 
 export default async function handler(req, res) {
   if (!soloMetodo(req, res, "POST")) return;
@@ -18,6 +19,11 @@ export default async function handler(req, res) {
 
   if (!providerId || stars < 1 || stars > 5) {
     return error(res, 400, "Datos inválidos");
+  }
+
+  const sesion = leerSesion(req);
+  if (sesion?.tipo === "trabajador" && String(sesion.id) === providerId) {
+    return error(res, 403, "No podés calificar tu propio perfil");
   }
 
   try {

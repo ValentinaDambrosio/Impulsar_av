@@ -259,7 +259,7 @@ function actualizarNavbar() {
     dropdown.className = "nav-user-dropdown";
     dropdown.id = "navUserDropdown";
     dropdown.innerHTML = `
-      ${Auth.tipo === "trabajador" ? '<a href="panel.html"><i class="fas fa-chart-line"></i> Mi panel</a>' : ""}
+      ${Auth.tipo === "trabajador" ? '<a href="panel.html"><i class="fas fa-chart-line"></i> Mi perfil</a>' : ""}
       <button type="button" id="btnCerrarSesion"><i class="fas fa-right-from-bracket"></i> Cerrar sesión</button>
     `;
     wrapper.appendChild(dropdown);
