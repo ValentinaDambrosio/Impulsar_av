@@ -21,7 +21,7 @@
                 <a href="index.html">
                     <img src="images/isotipo.ico" alt="logo-immpulsar">                 
                 </a>
-                <a href="https://activajuventudesymilitancia.com.ar/quienes-somos.html">
+                <a href="https://activajuventudesymilitancia.com.ar/index.html#bienvenida">
                     <img src="images/av-azul.ico" alt="logo-activá">
                 </a>
             </div>
@@ -30,22 +30,16 @@
                 <i class="fas fa-bars"></i>
             </button>
  
-            <div class="navbar-panel" id="navbarPanel">
-                <div class="navbar-search">
-                    <i class="fas fa-search"></i>
-                    <input type="text" id="buscadorServicios" placeholder="Buscar oficio o servicio...">
-                </div>
- 
                 <div class="main-menu">
                     <ul>
                         <li>
                             <a href="index.html">Inicio</a>
                         </li>
                         <li>
-                            <a href="bienvenida.html">Acerca de</a>
+                            <a href="tutorial">Tutorial</a>
                         </li>
                         <li>
-                            <a href="certificaciones.html">Certificaciones</a>
+                            <a href="bienvenida.html">Registrar servicio</a>
                         </li>
                         <li>
                             <a class="btn" href="#" id="navLoginBtn">
@@ -67,15 +61,32 @@
                 directamente en cada institución.
             </p>
  
-            <div class="certif-leyenda">
-                <span class="certif-badge badge-gratis"><i class="fas fa-check"></i> Gratuito</span>
-                <span class="certif-badge badge-mixto"><i class="fas fa-info-circle"></i> Gratuito y pago</span>
-                <span class="certif-badge badge-consultar"><i class="fas fa-question-circle"></i> Consultar costo</span>
+            <div class="certif-filtros">
+                <button class="certif-filtros-toggle" id="certifFiltrosToggle" type="button" aria-expanded="false" aria-controls="certifFiltrosPanel">
+                    <i class="fas fa-filter" aria-hidden="true"></i>
+                    <span>Filtrar</span>
+                    <i class="fas fa-chevron-down certif-filtros-flecha" aria-hidden="true"></i>
+                </button>
+                <div class="certif-filtros-panel" id="certifFiltrosPanel" hidden>
+                    <p class="certif-filtros-titulo">Mostrar modalidades</p>
+                    <label class="certif-filtro">
+                        <input type="checkbox" value="gratuito" data-filtro-costo checked>
+                        <span class="certif-badge badge-gratis"><i class="fas fa-check" aria-hidden="true"></i> Gratuito</span>
+                    </label>
+                    <label class="certif-filtro">
+                        <input type="checkbox" value="mixto" data-filtro-costo checked>
+                        <span class="certif-badge badge-mixto"><i class="fas fa-info-circle" aria-hidden="true"></i> Gratuito y pago</span>
+                    </label>
+                    <label class="certif-filtro">
+                        <input type="checkbox" value="consultar" data-filtro-costo checked>
+                        <span class="certif-badge badge-consultar"><i class="fas fa-question-circle" aria-hidden="true"></i> Consultar costo</span>
+                    </label>
+                </div>
             </div>
  
             <div class="certif-grid">
  
-                <div class="certif-card">
+                <div class="certif-card" data-costo="gratuito">
                     <div class="certif-card-header">
                         <h3>NIDO Vista Alegre</h3>
                         <span class="certif-badge badge-gratis"><i class="fas fa-check"></i> Gratuito</span>
@@ -90,7 +101,7 @@
                     </div>
                 </div>
  
-                <div class="certif-card">
+                <div class="certif-card" data-costo="gratuito">
                     <div class="certif-card-header">
                         <h3>PEC Tierras Argentinas</h3>
                         <span class="certif-badge badge-gratis"><i class="fas fa-check"></i> Gratuito</span>
@@ -105,7 +116,7 @@
                     </div>
                 </div>
  
-                <div class="certif-card">
+                <div class="certif-card" data-costo="gratuito">
                     <div class="certif-card-header">
                         <h3>Escuela Municipal de Capacitación Laboral San Roque</h3>
                         <span class="certif-badge badge-gratis"><i class="fas fa-check"></i> Gratuito</span>
@@ -121,7 +132,7 @@
                     </div>
                 </div>
  
-                <div class="certif-card">
+                <div class="certif-card" data-costo="gratuito">
                     <div class="certif-card-header">
                         <h3>CFP N° 405</h3>
                         <span class="certif-badge badge-gratis"><i class="fas fa-check"></i> Gratuito con título oficial</span>
@@ -136,7 +147,7 @@
                     </div>
                 </div>
  
-                <div class="certif-card">
+                <div class="certif-card" data-costo="gratuito">
                     <div class="certif-card-header">
                         <h3>CFP N° 402 "La Piedad"</h3>
                         <span class="certif-badge badge-gratis"><i class="fas fa-check"></i> Gratuito con título oficial</span>
@@ -150,7 +161,7 @@
                     </div>
                 </div>
  
-                <div class="certif-card">
+                <div class="certif-card" data-costo="mixto">
                     <div class="certif-card-header">
                         <h3>UNS (Centros de Extensión)</h3>
                         <span class="certif-badge badge-mixto"><i class="fas fa-info-circle"></i> Gratuitos y arancelados</span>
@@ -165,7 +176,7 @@
                     </div>
                 </div>
 
-                <div class="certif-card">
+                <div class="certif-card" data-costo="mixto">
                     <div class="certif-card-header">
                         <h3>UTN (Centros de Extensión)</h3>
                         <span class="certif-badge badge-mixto"><i class="fas fa-info-circle"></i> Gratuitos y arancelados</span>
@@ -180,6 +191,7 @@
                 </div>
  
             </div>
+            <p class="certif-sin-resultados" id="certifSinResultados" hidden>No hay instituciones registradas para la opción seleccionada.</p>
         </div>
     </section>
  
@@ -188,11 +200,6 @@
         <div class="footer-spacer" aria-hidden="true"></div>
         <img class="footer-logo" src="images/isologotipo.png" alt="logo">
         <div class="footer-derecha">
-            <nav class="footer-links">
-                <a href="index.html">Inicio</a>
-                <a href="bienvenida.html">Acerca de</a>
-                <a href="certificaciones.html">Certificaciones</a>
-            </nav>
             <div class="footer-contacto">
                 Contacto: <a href="mailto:impulsar@gmail.com">impulsar@gmail.com</a>
             </div>
@@ -203,5 +210,6 @@
     <script src="js/auth.js"></script>
     <script src="js/seguimientos.js"></script>
     <script src="js/menu.js"></script>
+    <script src="js/certificaciones.js"></script>
 </body>
 </html>

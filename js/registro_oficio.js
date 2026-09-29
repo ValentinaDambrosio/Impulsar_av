@@ -320,7 +320,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
 
-  const textoBotonFinalizar = vieneDelPanel ? "Guardar y volver a mi panel" : "Finalizar registro";
+  const textoBotonFinalizar = vieneDelPanel ? "Guardar e ir a mi perfil" : "Finalizar registro";
 
   async function leerJson(res) {
     const texto = await res.text();
