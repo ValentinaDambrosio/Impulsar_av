@@ -33,6 +33,7 @@ export default async function handler(req, res) {
     edad: parseInt(campos.edad || "0", 10),
     celular: (campos.celular || "").trim(),
     email: (campos.email || "").trim(),
+    barrio: (campos.barrio || "").trim(),
     instagram: (campos.instagram || "").trim(),
     estudios: (campos.estudios || "").trim()
   };
@@ -82,6 +83,7 @@ export default async function handler(req, res) {
         edad      = ${datos.edad},
         celular   = ${datos.celular},
         email     = ${datos.email},
+        barrio    = ${datos.barrio},
         instagram = ${datos.instagram || null},
         estudios  = ${datos.estudios}
         ${subida ? sql`, foto = ${subida.archivo}` : sql``}
@@ -96,7 +98,7 @@ export default async function handler(req, res) {
     return error(res, 500, "No se pudieron guardar los cambios");
   }
 
-  // Recién ahora se borra la foto vieja, con la nueva ya guardada en la base
+  // Se borra la foto vieja, con la nueva ya guardada en la base
   if (fotoAnterior) await borrar(BUCKETS.fotosPerfil, fotoAnterior);
 
   const nombreCompleto = `${datos.nombre} ${datos.apellido}`;

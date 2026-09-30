@@ -2047,3 +2047,34 @@ body.media-lightbox-abierto {
 .panel-link-oficios:hover {
     text-decoration: underline;
 }
+/* Ojito para mostrar/ocultar contraseña */
+
+.password-field-wrapper {
+    position: relative;
+}
+
+.password-field-wrapper input {
+    padding-right: 42px;
+    width: 100%;
+}
+
+.password-toggle-btn {
+    position: absolute;
+    top: 50%;
+    right: 8px;
+    transform: translateY(-50%);
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    background: transparent;
+    color: #888;
+    cursor: pointer;
+    font-size: 0.95rem;
+}
+
+.password-toggle-btn:hover {
+    color: var(--primary-color);
+}

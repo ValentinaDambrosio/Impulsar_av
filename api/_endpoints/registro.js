@@ -32,6 +32,7 @@ export default async function handler(req, res) {
     edad: parseInt(campos.edad || "0", 10),
     celular: (campos.celular || "").trim(),
     email: (campos.email || "").trim(),
+    barrio: (campos.barrio || "").trim(),
     instagram: (campos.instagram || "").trim(),
     estudios: (campos.estudios || "").trim(),
     password: campos.password || ""
@@ -81,11 +82,11 @@ export default async function handler(req, res) {
     try {
       await sql`
         INSERT INTO trabajadores
-          (provider_id, nombre, apellido, edad, celular, email, instagram,
+          (provider_id, nombre, apellido, edad, celular, email, barrio, instagram,
            estudios, foto, password_hash)
         VALUES
           (${slug}, ${datos.nombre}, ${datos.apellido}, ${datos.edad},
-           ${datos.celular}, ${datos.email}, ${datos.instagram || null},
+           ${datos.celular}, ${datos.email}, ${datos.barrio}, ${datos.instagram || null},
            ${datos.estudios}, ${subida.archivo}, ${passwordHash})
       `;
       guardado = true;

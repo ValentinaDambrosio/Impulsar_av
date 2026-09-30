@@ -87,6 +87,7 @@ function inyectarModalLogin() {
     </div>
   `;
   document.body.appendChild(modal);
+  activarTogglePassword(modal);
 
   document.getElementById("authModalCerrar").addEventListener("click", ocultarModalLogin);
   modal.addEventListener("click", (e) => {
@@ -255,26 +256,26 @@ function actualizarNavbar() {
     boton.parentNode.insertBefore(wrapper, boton);
     wrapper.appendChild(boton);
 
-    const dropdown = document.createElement("div");
-    dropdown.className = "nav-user-dropdown";
-    dropdown.id = "navUserDropdown";
-    dropdown.innerHTML = `
-      ${Auth.tipo === "trabajador" ? '<a href="panel.html"><i class="fas fa-chart-line"></i> Mi perfil</a>' : ""}
-      <button type="button" id="btnCerrarSesion"><i class="fas fa-right-from-bracket"></i> Cerrar sesión</button>
-    `;
-    wrapper.appendChild(dropdown);
-
-    dropdown.querySelector("#btnCerrarSesion").addEventListener("click", () => {
-      dropdown.classList.remove("activo");
-      cerrarSesion();
-    });
+    const nuevoDropdown = document.createElement("div");
+    nuevoDropdown.className = "nav-user-dropdown";
+    nuevoDropdown.id = "navUserDropdown";
+    wrapper.appendChild(nuevoDropdown);
 
     document.addEventListener("click", (e) => {
-      if (!wrapper.contains(e.target)) dropdown.classList.remove("activo");
+      if (!wrapper.contains(e.target)) nuevoDropdown.classList.remove("activo");
     });
   }
 
   const dropdown = document.getElementById("navUserDropdown");
+
+  dropdown.innerHTML = `
+    ${Auth.tipo === "trabajador" ? '<a href="panel.html"><i class="fas fa-chart-line"></i> Mi perfil</a>' : ""}
+    <button type="button" id="btnCerrarSesion"><i class="fas fa-right-from-bracket"></i> Cerrar sesión</button>
+  `;
+  dropdown.querySelector("#btnCerrarSesion").addEventListener("click", () => {
+    dropdown.classList.remove("activo");
+    cerrarSesion();
+  });
 
   if (Auth.logueado) {
     boton.innerHTML = `<i class="fas fa-user"></i> ${Auth.nombre.split(" ")[0]} <i class="fas fa-chevron-down nav-user-caret"></i>`;

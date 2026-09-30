@@ -39,6 +39,12 @@ document.addEventListener("DOMContentLoaded", () => {
     return "";
   }
 
+  function validarBarrio(valor) {
+    if (valor.trim() === "") return "Este campo es obligatorio";
+    if (valor.trim().length > 100) return "Muy largo";
+    return "";
+  }
+
   function validarCelular(valor) {
     if (valor.trim() === "") return "Este campo es obligatorio";
     if (!/^[0-9\s-]+$/.test(valor)) return "Solo se permiten números y guiones, sin letras ni símbolos";
@@ -69,6 +75,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const revisarApellido = conectarValidacion("apellido", "errorApellido", validarNombreApellido);
   const revisarEmail = conectarValidacion("email", "errorEmail", validarEmail);
   const revisarCelular = conectarValidacion("celular", "errorCelular", validarCelular);
+  const revisarBarrio = conectarValidacion("barrio", "errorBarrio", validarBarrio);
 
   /* Vista previa de la foto */
   inputFoto.addEventListener("change", () => {
@@ -91,8 +98,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const apellidoOk = revisarApellido();
     const emailOk = revisarEmail();
     const celularOk = revisarCelular();
+    const barrioOk = revisarBarrio();
 
-    if (!nombreOk || !apellidoOk || !emailOk || !celularOk) {
+    if (!nombreOk || !apellidoOk || !emailOk || !celularOk || !barrioOk) {
       mostrarError("Revisá los campos marcados en rojo antes de continuar.");
       return;
     }

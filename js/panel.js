@@ -143,6 +143,7 @@ function llenarFormulario(t) {
   document.getElementById("edad").value = t.edad;
   document.getElementById("celular").value = t.celular;
   document.getElementById("email").value = t.email;
+  document.getElementById("barrio").value = t.barrio || "";
   document.getElementById("instagram").value = t.instagram || "";
   document.getElementById("estudios").value = t.estudios;
 
@@ -181,6 +182,7 @@ function conectarFormularioEdicion() {
     datos.append("edad", document.getElementById("edad").value);
     datos.append("celular", document.getElementById("celular").value.trim());
     datos.append("email", document.getElementById("email").value.trim());
+    datos.append("barrio", document.getElementById("barrio").value.trim());
     datos.append("instagram", document.getElementById("instagram").value.trim());
     datos.append("estudios", document.getElementById("estudios").value);
 

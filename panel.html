@@ -161,7 +161,7 @@
                         <div class="form-row">
                             <div class="form-group">
                                 <label for="edad">Edad</label>
-                                <input type="number" id="edad" name="edad" min="16" max="99" required>
+                                <input type="number" id="edad" name="edad" min="18" max="99" required>
                             </div>
                             <div class="form-group">
                                 <label for="celular">Número de celular</label>
@@ -174,6 +174,12 @@
                             <label for="email">Email</label>
                             <input type="email" id="email" name="email" required>
                             <span class="campo-error" id="errorEmail"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="barrio">Barrio</label>
+                            <input type="text" id="barrio" name="barrio" placeholder="Ej: Villa Mitre" required>
+                            <span class="campo-error" id="errorBarrio"></span>
                         </div>
 
                         <div class="form-group">
@@ -204,6 +210,7 @@
         </div>
     </section>
 
+    <script src="js/password-toggle.js"></script>
     <script src="js/auth.js"></script>
     <script src="js/seguimientos.js"></script>
     <script src="js/menu.js"></script>

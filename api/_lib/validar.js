@@ -31,8 +31,8 @@ export function validarTrabajador(d, { conPassword }) {
 
   validarNombreApellido(errores, d.nombre, d.apellido);
 
-  if (d.edad < 16 || d.edad > 99) {
-    errores.push("La edad tiene que estar entre 16 y 99 años");
+  if (d.edad < 18 || d.edad > 99) {
+    errores.push("La edad tiene que estar entre 18 y 99 años");
   }
 
   if (!d.celular || !/^[0-9\s-]+$/.test(d.celular)) {
@@ -42,6 +42,10 @@ export function validarTrabajador(d, { conPassword }) {
     if (digitos.length < 8 || digitos.length > 15) {
       errores.push("Número de celular inválido");
     }
+  }
+
+  if (!d.barrio || d.barrio.length > 100) {
+    errores.push("El barrio es obligatorio");
   }
 
   if (!esEmail(d.email)) {

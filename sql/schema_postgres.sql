@@ -40,6 +40,7 @@ CREATE TABLE IF NOT EXISTS trabajadores (
     edad          smallint       NOT NULL CHECK (edad BETWEEN 0 AND 255),
     celular       varchar(30)    NOT NULL,
     email         varchar(150)   NOT NULL UNIQUE,
+    barrio        varchar(100),
     instagram     varchar(100),
     estudios      estudios_nivel NOT NULL,
     foto          varchar(255),

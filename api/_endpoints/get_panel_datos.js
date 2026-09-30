@@ -12,7 +12,7 @@ export default async function handler(req, res) {
   const providerId = sesion.id;
 
   const [trabajador] = await sql`
-    SELECT provider_id, nombre, apellido, edad, celular, email, instagram, estudios, foto
+    SELECT provider_id, nombre, apellido, edad, celular, email, barrio, instagram, estudios, foto
     FROM trabajadores WHERE provider_id = ${providerId}
   `;
 
