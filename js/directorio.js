@@ -48,9 +48,39 @@ function armarTarjetaPersona(p) {
     </div>`;
 }
 
+
+function enlazarTarjetasAlPerfil() {
+  document.querySelectorAll(".directory-card[data-id]").forEach((card) => {
+    if (card.dataset.enlazada) return;
+    card.dataset.enlazada = "1";
+
+    const url = `perfil.html?id=${encodeURIComponent(card.dataset.id)}`;
+
+    const foto = card.querySelector(".card-avatar");
+    if (foto) {
+      const linkFoto = document.createElement("a");
+      linkFoto.href = url;
+      linkFoto.className = "card-avatar-link";
+      foto.parentNode.insertBefore(linkFoto, foto);
+      linkFoto.appendChild(foto);
+    }
+
+    const nombre = card.querySelector(".card-header-info h3");
+    if (nombre) {
+      const linkNombre = document.createElement("a");
+      linkNombre.href = url;
+      linkNombre.className = "card-nombre-link";
+      while (nombre.firstChild) linkNombre.appendChild(nombre.firstChild);
+      nombre.appendChild(linkNombre);
+    }
+  });
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   const grid = document.getElementById("directoryGrid");
   if (!grid) return;
+
+  enlazarTarjetasAlPerfil();
 
   fetch("api/get_directorio")
     .then((res) => res.json())
@@ -60,6 +90,8 @@ document.addEventListener("DOMContentLoaded", () => {
       personas.forEach((p) => {
         grid.insertAdjacentHTML("beforeend", armarTarjetaPersona(p));
       });
+
+      enlazarTarjetasAlPerfil();
 
       if (typeof cargarCalificaciones === "function") {
         cargarCalificaciones();

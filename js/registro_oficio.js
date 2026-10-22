@@ -1,5 +1,41 @@
 /* Registro — Parte 2: oficio/servicio */
 
+function mostrarInvitacionCanal(canalUrl, destino, titulo) {
+  const overlay = document.createElement("div");
+  overlay.className = "auth-modal-overlay";
+  overlay.innerHTML = `
+    <div class="auth-modal canal-modal" role="dialog" aria-modal="true" aria-labelledby="canalTitulo">
+      <div class="canal-icono"><i class="fab fa-whatsapp"></i></div>
+      <h2 id="canalTitulo">${titulo}</h2>
+      <p>¿Querés unirte al canal de WhatsApp de Impulsar? Ahí vamos a compartir novedades de la página y todo lo referido a ella, además de encuestas para organizar futuras reuniones sobre la plataforma.</p>
+      <div class="canal-botones">
+        <a class="btn btn-primary btn-block" id="canalSi" target="_blank" rel="noopener noreferrer">Sí, quiero unirme</a>
+        <button type="button" class="btn btn-block" id="canalNo">No, gracias</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+
+  const irAlDestino = () => { window.location.href = destino; };
+  const botonSi = document.getElementById("canalSi");
+  botonSi.href = canalUrl;
+
+  botonSi.addEventListener("click", () => {
+    setTimeout(irAlDestino, 500);
+  });
+  document.getElementById("canalNo").addEventListener("click", irAlDestino);
+}
+
+async function obtenerLinkCanal() {
+  try {
+    const res = await fetch("api/get_canal_whatsapp");
+    const data = await res.json();
+    return data.url || null;
+  } catch {
+    return null;
+  }
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   const providerId = obtenerProviderId();
 
@@ -387,14 +423,24 @@ document.addEventListener("DOMContentLoaded", () => {
       }).then(leerJson);
 
       const destino = vieneDelPanel ? "panel.html" : "index.html";
-      mensaje.textContent = vieneDelPanel
+      sessionStorage.removeItem("provider_id");
+
+      const textoExito = vieneDelPanel
         ? "¡Listo! Se agregó a tu perfil. Te llevamos de vuelta a tu panel..."
         : "¡Listo! Tu registro se completó con éxito. Te llevamos al inicio...";
-      mensaje.className = "form-mensaje exito";
-      sessionStorage.removeItem("provider_id");
-      setTimeout(() => {
-        window.location.href = destino;
-      }, 2000);
+      const tituloPopup = vieneDelPanel ? "¡Se agregó a tu perfil!" : "¡Tu registro se completó!";
+
+      const canalUrl = await obtenerLinkCanal();
+
+      if (canalUrl) {
+        mostrarInvitacionCanal(canalUrl, destino, tituloPopup);
+      } else {
+        mensaje.textContent = textoExito;
+        mensaje.className = "form-mensaje exito";
+        setTimeout(() => {
+          window.location.href = destino;
+        }, 2000);
+      }
     })().catch((err) => {
       mensaje.textContent = err.message;
       mensaje.className = "form-mensaje error";

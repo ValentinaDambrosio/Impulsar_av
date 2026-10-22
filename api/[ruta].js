@@ -18,6 +18,7 @@ import { error } from "./_lib/http.js";
 
 import actualizar_perfil from "./_endpoints/actualizar_perfil.js";
 import eliminar_oficio from "./_endpoints/eliminar_oficio.js";
+import get_canal_whatsapp from "./_endpoints/get_canal_whatsapp.js";
 import get_directorio from "./_endpoints/get_directorio.js";
 import get_panel_datos from "./_endpoints/get_panel_datos.js";
 import get_perfil from "./_endpoints/get_perfil.js";
@@ -43,6 +44,7 @@ import url_subida from "./_endpoints/url_subida.js";
 const RUTAS = {
   actualizar_perfil,
   eliminar_oficio,
+  get_canal_whatsapp,
   get_directorio,
   get_panel_datos,
   get_perfil,

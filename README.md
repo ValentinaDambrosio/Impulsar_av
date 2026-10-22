@@ -1,155 +1,155 @@
 # Impulsar
 
-Directorio de oficios del barrio. Frontend estático + funciones serverless en
-**Vercel**, con **Supabase** (PostgreSQL + Storage) como base.
+Impulsar es un directorio de oficios y servicios del barrio. Permite explorar y
+contactar trabajadores, crear perfiles, publicar trabajos y administrar la
+información desde un panel personal.
 
-Antes esto era PHP + MySQL sobre Apache. La lógica es la misma: los endpoints
-de `api/` hacen lo mismo que hacían los `.php`, devuelven el mismo JSON y los
-mismos códigos de error. Lo que cambió es dónde corre.
+La aplicación usa páginas estáticas con HTML, CSS y JavaScript, una API serverless
+en Vercel y Supabase para PostgreSQL y almacenamiento de archivos.
 
----
+## Funcionalidades
 
-## Cómo está armado
+- Registro e inicio de sesión para trabajadores y usuarios.
+- Directorio con búsqueda, filtros, perfiles y medios de trabajos.
+- Registro y edición de oficios, certificaciones y datos de perfil.
+- Contacto y calificaciones de trabajadores.
+- Panel personal y seguimiento de contactos.
+- Recuperación de contraseña y correos enviados mediante Make.
+- Invitación opcional al canal de WhatsApp luego de completar el registro.
 
+## Tecnologías
+
+- Node.js 22 o superior para la API y las herramientas del proyecto.
+- JavaScript, HTML y CSS sin framework ni compilación de frontend.
+- Vercel Functions para las rutas `/api/*`.
+- Supabase PostgreSQL y Supabase Storage.
+- `postgres`, `@supabase/supabase-js`, `bcryptjs` y `formidable`.
+
+## Estructura
+
+```text
+*.html                 Páginas de la aplicación
+css/                   Estilos
+js/                    Lógica del frontend
+images/                Recursos visuales
+api/[ruta].js          Dispatcher de las rutas API
+api/_endpoints/        Implementación de cada endpoint
+api/_lib/              Conexión, sesiones, archivos y utilidades compartidas
+sql/                   Esquema, buckets y cambios de base de datos
+migracion/             Herramientas para importar datos del sistema anterior
+uploads/               Archivos de origen para la migración
 ```
-index.html, perfil.html, …   el frontend, HTML/CSS/JS vanilla, sin build
-css/  images/  js/           igual que antes
-api/
-  [ruta].js                  la única función: reparte /api/<ruta> al endpoint
-  _endpoints/                los endpoints, uno por archivo (antes eran .php)
-  _lib/                      lo compartido (era api/db.php)
-    db.js                    conexión a Postgres
-    sesion.js                cookie firmada (era $_SESSION)
-    archivos.js              Supabase Storage (era move_uploaded_file)
-    validar.js               las validaciones de los formularios
-    http.js                  helpers de request/response + IP real
-    make.js                  webhook de los mails
-    seguimiento.js           popup y mails post-contacto
-sql/schema_postgres.sql      el esquema traducido de MySQL
-sql/seguimientos.sql         alta de la feature si el esquema ya existía
-migracion/                   MySQL → Supabase, para los datos que ya existen
-```
 
-Vercel sirve los `.html` como archivos estáticos y publica `api/[ruta].js` como
-**una sola función** que atiende todas las rutas `/api/...`. Es así porque el
-plan Hobby no deja más de 12 funciones por deploy y hay más de 12 rutas. Las
-carpetas que empiezan con `_` Vercel no las publica: son código común.
+Vercel ejecuta `api/[ruta].js` como dispatcher: cada `/api/<nombre>` se deriva
+al endpoint correspondiente de `api/_endpoints/`. Para añadir una ruta, crear su
+endpoint e importarlo y registrarlo en `api/[ruta].js`.
 
-Para agregar un endpoint: crear el archivo en `api/_endpoints/` y sumarlo al
-mapa `RUTAS` de `api/[ruta].js`.
+## Requisitos
 
-## Equivalencias
+- Node.js 22 o superior y npm.
+- Una cuenta y un proyecto de Supabase.
+- Vercel CLI para probar localmente la API.
+- PHP y acceso a la base MySQL anterior solo si se va a hacer la migración.
 
-| Antes | Ahora |
+## Configuración
+
+1. Instalar dependencias desde la raíz:
+
+   ```powershell
+   npm ci
+   ```
+
+2. Crear `.env.local` a partir de `.env.example`:
+
+   ```powershell
+   Copy-Item .env.example .env.local
+   ```
+
+3. Completar los valores de Supabase y los secretos. Para `DATABASE_URL`, usar
+   el **Transaction pooler** de Supabase, normalmente en el puerto `6543`.
+
+4. Configurar la base de datos en Supabase:
+
+   - Ejecutar `sql/schema_postgres.sql` en el SQL Editor.
+   - Ejecutar `sql/storage_buckets.sql` para crear los buckets de archivos.
+   - Ejecutar `sql/seguimientos.sql` si la base existente todavía no tiene las
+     tablas o columnas de seguimiento que define ese archivo.
+
+### Variables de entorno
+
+| Variable | Uso |
 |---|---|
-| PHP 8 + PDO | Node 22, funciones de Vercel |
-| MySQL / InnoDB | PostgreSQL (Supabase) |
-| `$_SESSION` + `session_start()` | cookie firmada con HMAC (`api/_lib/sesion.js`) |
-| `password_hash()` / `password_verify()` | `bcryptjs` — **los hash que ya existen siguen sirviendo** |
-| `move_uploaded_file()` → `uploads/` | Supabase Storage, 3 buckets |
-| `$_FILES` | `formidable` |
-| URL del webhook escrita en `db.php` | variable de entorno `MAKE_WEBHOOK_URL` |
+| `DATABASE_URL` | Conexión de la API a PostgreSQL. Requerida. |
+| `SUPABASE_URL` | URL del proyecto Supabase. Requerida. |
+| `SUPABASE_SERVICE_ROLE_KEY` | Acceso de servidor a Supabase. Requerida y secreta. |
+| `SESSION_SECRET` | Firma de las cookies de sesión. Requerida; usar un valor aleatorio de al menos 32 caracteres. |
+| `MAKE_WEBHOOK_URL` | Webhook de Make para los correos. Opcional. |
+| `SITE_URL` | Dominio público para armar enlaces de recuperación y seguimiento. |
+| `CRON_SECRET` | Secreto para proteger el endpoint de seguimiento solicitado por Make. |
+| `CANAL_WHATSAPP_URL` | Enlace público al canal; lo entrega el endpoint de configuración del canal. |
 
-El esquema de la base **no cambió**: mismas tablas, mismas claves foráneas,
-mismos `ON DELETE CASCADE`, mismos `UNIQUE`. Solo se tradujo el dialecto
-(`AUTO_INCREMENT` → `IDENTITY`, `ENUM` → `CREATE TYPE`, los `INDEX` de adentro
-del `CREATE TABLE` pasaron a `CREATE INDEX` aparte). Ver `sql/schema_postgres.sql`.
+Generar secretos desde PowerShell con Node:
 
-## Variables de entorno
-
-Copiar `.env.example` y completar. Las de DATABASE/SUPABASE/SESSION van sí o sí:
-
-| Variable | De dónde sale |
-|---|---|
-| `DATABASE_URL` | Supabase → Database → Connection string → **Transaction pooler (6543)** |
-| `SUPABASE_URL` | Supabase → API |
-| `SUPABASE_SERVICE_ROLE_KEY` | Supabase → API → `service_role` |
-| `SESSION_SECRET` | `node -e "console.log(require('crypto').randomBytes(48).toString('base64url'))"` |
-| `MAKE_WEBHOOK_URL` | el webhook de Make (opcional: sin esto no salen los mails) |
-| `SITE_URL` | el dominio, para armar el link de recuperación y los de seguimiento |
-| `CRON_SECRET` | clave para que Make pida `/api/seguimientos_para_email?clave=...` |
-
-⚠️ La `service_role` saltea la seguridad de la base. Va solo en las variables de
-Vercel, nunca en `js/`.
-
-## Puesta en marcha
-
-1. Crear el proyecto en Supabase.
-2. Correr `sql/schema_postgres.sql` en el SQL Editor.
-3. Correr `sql/storage_buckets.sql`: crea los tres buckets públicos
-   (`fotos-perfil`, `fotos-trabajo`, `videos-trabajo`) con sus límites.
-   Si el esquema ya estaba aplicado sin seguimientos, correr también
-   `sql/seguimientos.sql`.
-4. Importar el repo en Vercel y cargar las variables de entorno.
-5. Migrar los datos que ya existen (abajo).
-6. Deploy.
-
-## Migrar los datos que ya existen
-
-Dos pasos, porque la base vieja vive en otra máquina:
-
-```bash
-# 1. donde esté MySQL — solo lee, no modifica nada
-php migracion/exportar_mysql.php > datos.json
-# copiar datos.json y la carpeta uploads/ a migracion/export/
-
-# 2. acá
-cd migracion && npm install
-npm run seco        # simulacro, no escribe
-npm run importar
+```powershell
+node -e "console.log(require('crypto').randomBytes(48).toString('base64url'))"
 ```
 
-**Las contraseñas no se migran porque no hace falta.** Al quedarnos con la misma
-columna `password_hash`, los hash bcrypt que generó PHP entran tal cual.
-Verificado: `bcryptjs` acepta el prefijo `$2y$` de PHP sin tocar nada.
+`SUPABASE_SERVICE_ROLE_KEY`, `SESSION_SECRET` y `CRON_SECRET` son valores de
+servidor: no incluirlos en `js/`, HTML ni repositorios públicos. `.env.local` está
+ignorado por Git. La URL del canal sí es pública, pero también se configura en el
+servidor para que el navegador no lea directamente archivos de entorno.
 
-## Lo que se arregló de paso
+## Desarrollo local
 
-- **Las calificaciones detrás de un proxy.** `submit_rating.php` usaba
-  `$_SERVER["REMOTE_ADDR"]` con un `UNIQUE (provider_id, ip_address)`. En Vercel
-  —y detrás de cualquier CDN— esa es la IP del proxy, la misma para todos: el
-  primer voto bloqueaba a todo el mundo. Ahora se lee la IP real del header
-  (`api/_lib/http.js` → `ipDelCliente`).
-- **Slugs que se pisaban.** `registro.php` consultaba si el slug estaba libre y
-  después insertaba; entre las dos cosas, dos registros simultáneos con el mismo
-  nombre se quedaban con el mismo. Ahora decide la base con el `UNIQUE` y se
-  reintenta al chocar.
-- **Cualquiera podía cargarle oficios a otro.** `guardar_oficios.php` solo
-  verificaba que el `provider_id` existiera, no que fuera tuyo. Ahora también
-  tiene que coincidir con la sesión.
-- **Links de recuperación reusables.** `resetear_password.php` leía y después
-  actualizaba sin bloquear la fila; dos peticiones con el mismo token podían
-  pasar las dos. Ahora la consulta lleva `FOR UPDATE`.
-- **N+1 en el perfil.** Se hacía una consulta de media por cada oficio. Ahora es
-  un `LEFT JOIN` con `json_agg`.
+El frontend estático puede abrirse con un servidor de archivos, pero las
+operaciones de registro, sesión y datos necesitan que también estén disponibles
+las rutas `/api`. Para probar la aplicación completa:
 
-## Lo que quedó afuera, a propósito
+```powershell
+npx vercel dev
+```
 
-- **`js/main.js`.** `index.html` del zip lo cargaba pero el archivo nunca estuvo
-  en el repo (tiraba 404). Se sacó el `<script>`.
-- **`uploads/`.** Se deja en el repo a propósito: es la fuente de la migración a
-  Storage. Una vez migrado y verificado, se puede borrar en un commit aparte.
+Abrir la URL local que informa Vercel. Si el proyecto aún no está vinculado a
+Vercel, iniciar sesión y vincularlo con `npx vercel login` y `npx vercel link`.
+Vercel CLI debe poder leer `.env.local` para las funciones locales.
 
-## Pendiente de seguridad
+No hay un script de pruebas automatizadas definido en `package.json`.
 
-`api/db.php` tenía commiteados `$CRON_SECRET = "impulsar2026"` y la URL del
-webhook de Make. Borrar el archivo **no los saca del historial de git**: siguen
-siendo visibles en cualquier clon del repo. **Hay que rotar el webhook en Make.**
+## Despliegue
 
-## Qué falta probar
+Importar el repositorio en Vercel y configurar allí las variables de entorno de
+producción, incluyendo `CANAL_WHATSAPP_URL`. Verificar que las variables de
+Supabase y los buckets estén configurados antes de probar registros o subidas.
+Vercel sirve las páginas estáticas y publica la API mediante `api/[ruta].js`.
 
-Nada de esto se probó corriendo: no hay MySQL ni Postgres en la máquina donde se
-escribió. Sí está verificado que los endpoints de `/api` cargan sin errores de import,
-que la firma de las cookies rechaza payloads alterados, y que `bcryptjs` lee los
-hash de PHP.
+## Migración desde MySQL
 
-Recorrido para la primera prueba real:
+La carpeta `migracion/` contiene el exportador PHP y el importador a Supabase.
+La importación espera `migracion/export/datos.json` y, si corresponde, la carpeta
+`migracion/export/uploads/` con las imágenes y videos originales.
 
-1. Registro de trabajador (parte 1 + parte 2 con fotos y video)
-2. Login / logout / recuperar contraseña
-3. Directorio: fotos y promedios
-4. Perfil: media, calificar, intentar calificar dos veces (tiene que rebotar)
-5. Panel: estadísticas, editar perfil, cambiar foto, borrar un oficio
-6. Registro de usuario común desde el modal
-7. Contacto logueado → a los 5 días (o adelantando `proxima_fecha` en la base)
-   tiene que aparecer el popup de seguimiento
+1. En el entorno con acceso a MySQL, exportar los datos:
+
+   ```powershell
+   php migracion/exportar_mysql.php > migracion/datos.json
+   ```
+
+2. Copiar el JSON exportado y los archivos necesarios a `migracion/export/`.
+3. Desde `migracion/`, instalar dependencias y verificar primero el simulacro:
+
+   ```powershell
+   Set-Location migracion
+   npm install
+   npm run seco
+   ```
+
+4. Cuando el simulacro sea correcto, ejecutar la importación real:
+
+   ```powershell
+   npm run importar
+   ```
+
+El importador necesita `DATABASE_URL`, `SUPABASE_URL` y
+`SUPABASE_SERVICE_ROLE_KEY`. El modo `seco` no escribe datos ni sube archivos.
+Los archivos de exportación pueden contener información personal; no deben
+publicarse ni subirse al repositorio.
