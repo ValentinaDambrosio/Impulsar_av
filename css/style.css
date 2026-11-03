@@ -2132,3 +2132,72 @@ body.media-lightbox-abierto {
     flex-direction: column;
     gap: 10px;
 }
+
+/* Tutoriales en youtube (player) */
+
+.yt-lite {
+    position: relative;
+    aspect-ratio: 9 / 16;
+    width: 100%;
+    max-width: 300px;
+    margin: 0 auto;
+    background: #000 center / cover no-repeat;
+    border-radius: 12px;
+    overflow: hidden;
+    cursor: pointer;
+}
+
+.tut-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+    gap: 24px;
+    margin-top: 30px;
+}
+
+.tut-card {
+    background: #fff;
+    border: 1px solid #e4e4e4;
+    border-radius: 14px;
+    padding: 16px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.tut-card h3 {
+    font-size: 1rem;
+    margin: 14px 0 4px;
+}
+
+.tut-card p {
+    font-size: 0.85rem;
+    color: #666;
+    margin-bottom: 15px;
+}
+
+.yt-lite iframe {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+}
+
+.yt-play {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.65);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+    transition: 0.2s;
+}
+
+.yt-lite:hover .yt-play {
+    background: var(--primary-color);
+}

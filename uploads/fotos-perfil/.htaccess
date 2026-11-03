@@ -1,5 +1,0 @@
-# Evita que cualquier archivo subido a esta carpeta se pueda ejecutar como script,
-# aunque alguien logre subir un .php disfrazado de imagen.
-<FilesMatch "\.(php|phtml|php3|php4|php5|pl|py|cgi|sh)$">
-    Require all denied
-</FilesMatch>
