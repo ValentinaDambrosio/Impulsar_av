@@ -4,10 +4,17 @@ document.addEventListener("DOMContentLoaded", () => {
   const form = document.getElementById("formRegistro");
   const mensaje = document.getElementById("formMensaje");
   const btn = document.getElementById("btnRegistrar");
+  const checkTerminos = document.getElementById("aceptaTerminos");
+
+
+  checkTerminos.addEventListener("change", () => {
+    btn.disabled = !checkTerminos.checked;
+  });
   const inputFoto = document.getElementById("foto");
   const previewFoto = document.getElementById("previewFoto");
 
-  // true cuando la persona ya tiene una cuenta de usuario
+  // true cuando la persona ya tiene una cuenta de usuario: su nombre, apellido,
+  // correo y contraseña ya existen y no se vuelven a pedir
   let modoUsuario = false;
 
   /* Validaciones */
@@ -123,6 +130,11 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
 
+    if (!checkTerminos.checked) {
+      mostrarError("Tenés que aceptar los Términos y Condiciones.");
+      return;
+    }
+
     const archivo = inputFoto.files[0];
     if (archivo && archivo.size > 3 * 1024 * 1024) {
       mostrarError("La foto no puede pesar más de 3MB.");
@@ -161,11 +173,11 @@ document.addEventListener("DOMContentLoaded", () => {
   function mostrarError(texto) {
     mensaje.textContent = texto;
     mensaje.className = "form-mensaje error";
-    btn.disabled = false;
+    btn.disabled = !checkTerminos.checked;
     btn.textContent = "Continuar a la Parte 2";
   }
 
-
+  
   const puerta = document.getElementById("puertaRegistro");
   const tarjetaFormulario = document.getElementById("tarjetaFormulario");
 
@@ -212,7 +224,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   async function decidirPaso() {
     try {
-      await verificarSesion();
+      await verificarSesion(); // viene de auth.js; deja la sesión en el objeto Auth
     } catch {
     }
 
@@ -238,7 +250,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   document.getElementById("btnYaTengoCuenta").addEventListener("click", () => {
     mostrarModalLogin(
-      decidirPaso,
+      decidirPaso, // al iniciar sesión, se vuelve a decidir según el tipo de cuenta
       "Iniciá sesión con tu cuenta para continuar con el registro de tu servicio."
     );
   });

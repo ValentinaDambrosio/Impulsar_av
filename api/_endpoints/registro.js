@@ -9,6 +9,7 @@ import {
   parsearFormulario, subir, borrar, BUCKETS, TIPOS_FOTO, MAX_FOTO
 } from "../_lib/archivos.js";
 import { avisarAMake } from "../_lib/make.js";
+import { aceptoTerminos, registrarAceptacion } from "../_lib/terminos.js";
 
 /* Llegan archivos (multipart): el body se lee crudo con formidable.
    Ver el comentario de api/[ruta].js sobre no tocar req.body antes. */
@@ -26,7 +27,7 @@ export default async function handler(req, res) {
     return error(res, 400, "No se pudo leer el formulario");
   }
 
-  
+
   const sesion = leerSesion(req);
 
   if (sesion?.tipo === "trabajador") {
@@ -55,17 +56,15 @@ export default async function handler(req, res) {
     password: campos.password || ""
   };
 
-  
   const errores = validarTrabajador(datos, { conPassword: !usuario, conDominio: !usuario });
+  if (!aceptoTerminos(campos.acepta_terminos)) errores.push("Tenés que aceptar los Términos y Condiciones");
   if (errores.length) return error(res, 400, errores.join(". "));
-
 
   const [[yaTrabajador], [yaUsuario]] = await Promise.all([
     sql`SELECT 1 FROM trabajadores WHERE email = ${datos.email}`,
     sql`SELECT 1 FROM usuarios WHERE email = ${datos.email}`
   ]);
 
-  
   if (yaTrabajador || (yaUsuario && !usuario)) {
     return error(res, 409, "Ese email ya está registrado. Iniciá sesión o usá otro email.");
   }
@@ -128,6 +127,12 @@ export default async function handler(req, res) {
   if (!guardado) {
     await borrar(BUCKETS.fotosPerfil, subida.archivo);
     return error(res, 500, "No se pudo generar un identificador para tu perfil");
+  }
+
+  try {
+    await registrarAceptacion(sql, req, "trabajador", slug);
+  } catch (e) {
+    console.error("registro (constancia de términos):", slug, e);
   }
 
   if (usuario) {

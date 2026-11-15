@@ -51,7 +51,6 @@
 
     <section class="hero">
         <div class="container-sm">
-            <!--se muestra solo si no hay ninguna sesión iniciada -->
             <div class="form-card" id="puertaRegistro" hidden>
                 <h1 class="text-xl text-center">Registrar tu servicio</h1>
                 <p class="text-center">Para publicar tu servicio necesitás una cuenta en Impulsar. ¿Ya tenés una?</p>
@@ -138,7 +137,12 @@
 
                     <div id="formMensaje" class="form-mensaje"></div>
 
-                    <button type="submit" class="btn btn-primary btn-block" id="btnRegistrar">
+                    <label class="terminos-check">
+                        <input type="checkbox" id="aceptaTerminos" name="acepta_terminos" value="true">
+                        <span>Leí y acepto los <a href="terminos.html" target="_blank" rel="noopener">Términos y Condiciones</a></span>
+                    </label>
+
+                    <button type="submit" class="btn btn-primary btn-block" id="btnRegistrar" disabled>
                         Continuar a la Parte 2
                     </button>
                 </form>
@@ -157,6 +161,9 @@
         <div class="footer-derecha">
             <div class="footer-contacto">
                 Contacto: <a href="mailto:impulsar.av@gmail.com">impulsar.av@gmail.com</a>
+            </div>
+            <div class="footer-terminos">
+                <a href="terminos.html">Términos y Condiciones</a>
             </div>
         </div>
     </div>

@@ -71,7 +71,11 @@ function inyectarModalLogin() {
           </div>
         </div>
         <div class="form-mensaje" id="authRegMensaje"></div>
-        <button type="submit" class="btn btn-primary btn-block">Crear cuenta</button>
+        <label class="terminos-check">
+          <input type="checkbox" id="authRegTerminos">
+          <span>Leí y acepto los <a href="terminos.html" target="_blank" rel="noopener">Términos y Condiciones</a></span>
+        </label>
+        <button type="submit" class="btn btn-primary btn-block" id="authBtnCrearCuenta" disabled>Crear cuenta</button>
       </form>
 
       <form id="authFormOlvide" class="auth-form" hidden>
@@ -177,10 +181,20 @@ function inyectarModalLogin() {
       });
   });
 
+  document.getElementById("authRegTerminos").addEventListener("change", (e) => {
+    document.getElementById("authBtnCrearCuenta").disabled = !e.target.checked;
+  });
+
   document.getElementById("authFormRegistro").addEventListener("submit", (e) => {
     e.preventDefault();
     const mensaje = document.getElementById("authRegMensaje");
     mensaje.textContent = "";
+
+    if (!document.getElementById("authRegTerminos").checked) {
+      mensaje.textContent = "Tenés que aceptar los Términos y Condiciones.";
+      mensaje.className = "form-mensaje error";
+      return;
+    }
 
     const password = document.getElementById("authRegPassword").value;
     const password2 = document.getElementById("authRegPassword2").value;
@@ -198,7 +212,8 @@ function inyectarModalLogin() {
         nombre: document.getElementById("authRegNombre").value.trim(),
         apellido: document.getElementById("authRegApellido").value.trim(),
         email: document.getElementById("authRegEmail").value.trim(),
-        password: document.getElementById("authRegPassword").value
+        password: document.getElementById("authRegPassword").value,
+        acepta_terminos: true
       })
     })
       .then(async (res) => {
@@ -349,7 +364,7 @@ document.addEventListener("click", (e) => {
 
 document.addEventListener("DOMContentLoaded", () => {
   inyectarModalLogin();
-  /* Otras páginas pueden esperar esta promesa para saber
+  /* Otras páginas (ej. perfil.js) pueden esperar esta promesa para saber
      si el usuario está logueado antes de decidir qué mostrar. */
   Auth.listo = verificarSesion();
 });

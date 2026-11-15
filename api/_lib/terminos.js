@@ -1,0 +1,26 @@
+/* Constancia de aceptación de los Términos y Condiciones.
+ *
+ * Cada vez que alguien crea una cuenta se guarda: quién (tipo + ID), cuándo
+ * (la base pone la fecha y hora del servidor, no la del navegador), desde qué IP
+ * y qué versión del texto aceptó.
+ *
+ * Cuando se modifique terminos.html de fondo, subir VERSION_TERMINOS para poder
+ * saber qué texto aceptó cada persona. */
+
+import { ipDelCliente } from "./http.js";
+
+export const VERSION_TERMINOS = "1.0";
+
+export function aceptoTerminos(valor) {
+  return valor === true || valor === "true" || valor === "on";
+}
+
+export async function registrarAceptacion(db, req, cuentaTipo, cuentaId) {
+  const userAgent = String(req.headers["user-agent"] || "").slice(0, 300);
+  await db`
+    INSERT INTO aceptaciones_terminos
+      (cuenta_tipo, cuenta_id, version, ip_address, user_agent)
+    VALUES
+      (${cuentaTipo}, ${String(cuentaId)}, ${VERSION_TERMINOS}, ${ipDelCliente(req)}, ${userAgent})
+  `;
+}

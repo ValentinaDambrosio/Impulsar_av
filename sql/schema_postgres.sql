@@ -164,6 +164,21 @@ CREATE INDEX IF NOT EXISTS idx_seguimientos_proxima
 CREATE INDEX IF NOT EXISTS idx_vistas_provider_fecha
     ON vistas_perfil (provider_id, created_at DESC);
 
+-- Constancia de aceptación de los Términos y Condiciones (respaldo ante reclamos).
+-- cuenta_id: id numérico del usuario o provider_id del trabajador.
+-- created_at lo pone la base (hora del servidor), no el navegador.
+CREATE TABLE IF NOT EXISTS aceptaciones_terminos (
+    id          BIGSERIAL PRIMARY KEY,
+    cuenta_tipo TEXT        NOT NULL CHECK (cuenta_tipo IN ('usuario', 'trabajador')),
+    cuenta_id   TEXT        NOT NULL,
+    version     TEXT        NOT NULL,
+    ip_address  TEXT        NOT NULL,
+    user_agent  TEXT,
+    created_at  TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS idx_aceptaciones_cuenta
+    ON aceptaciones_terminos (cuenta_tipo, cuenta_id);
+
 -- ───────────────────── seguridad a nivel de fila ─────────────────────
 -- Toda la app entra por las funciones de /api con la service_role key, que
 -- saltea RLS. Se prende igual para que nadie pueda leer estas tablas usando
@@ -180,5 +195,6 @@ ALTER TABLE busquedas       ENABLE ROW LEVEL SECURITY;
 ALTER TABLE vistas_perfil   ENABLE ROW LEVEL SECURITY;
 ALTER TABLE contactos       ENABLE ROW LEVEL SECURITY;
 ALTER TABLE seguimientos    ENABLE ROW LEVEL SECURITY;
+ALTER TABLE aceptaciones_terminos ENABLE ROW LEVEL SECURITY;
 
 COMMIT;

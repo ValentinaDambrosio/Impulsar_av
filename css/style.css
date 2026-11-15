@@ -2218,3 +2218,103 @@ body.media-lightbox-abierto {
 .yt-lite:hover .yt-play {
     background: var(--primary-color);
 }
+
+/* Términos y Condiciones */
+
+.terminos-check {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin: 12px 0;
+    font-size: 0.9rem;
+    color: #444;
+    cursor: pointer;
+    line-height: 1.4;
+}
+
+.terminos-check input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    margin-top: 2px;
+    flex-shrink: 0;
+    accent-color: var(--primary-color);
+    cursor: pointer;
+}
+
+.terminos-check a {
+    color: var(--primary-color);
+    font-weight: 600;
+    text-decoration: underline;
+}
+
+.btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.site-footer .footer-terminos {
+    font-size: 0.85rem;
+    margin-top: 2px;
+}
+
+.site-footer .footer-terminos a {
+    color: #555;
+    font-weight: 600;
+}
+
+.site-footer .footer-terminos a:hover {
+    color: var(--primary-color);
+}
+
+.terminos-pagina {
+    max-width: 800px;
+    padding-top: 30px;
+    padding-bottom: 50px;
+    line-height: 1.65;
+    color: #333;
+}
+
+.terminos-pagina h1 {
+    color: var(--primary-color);
+    font-size: 1.8rem;
+    margin-bottom: 4px;
+}
+
+.terminos-pagina h2 {
+    font-size: 1.15rem;
+    margin: 28px 0 8px;
+    color: #222;
+}
+
+.terminos-pagina ul {
+    list-style: disc;
+    padding-left: 22px;
+}
+
+.terminos-pagina li {
+    margin-bottom: 6px;
+}
+
+.terminos-pagina a {
+    color: var(--primary-color);
+}
+
+.terminos-version {
+    color: #777;
+    font-size: 0.85rem;
+    margin-bottom: 20px;
+}
+
+.terminos-volver {
+    margin-left: auto;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--primary-color);
+    text-decoration: none;
+}
+
+@media (max-width: 480px) {
+    .site-footer .footer-terminos {
+        text-align: center;
+    }
+}
