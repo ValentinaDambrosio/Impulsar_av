@@ -218,9 +218,13 @@ function inyectarModalLogin() {
   });
 }
 
-function mostrarModalLogin(accionPendiente) {
+const AVISO_LOGIN_POR_DEFECTO =
+  "Para calificar o contactar a un trabajador, primero tenés que iniciar sesión.";
+
+function mostrarModalLogin(accionPendiente, aviso) {
   inyectarModalLogin();
   Auth.accionPendiente = accionPendiente || null;
+  document.getElementById("authAviso").textContent = aviso || AVISO_LOGIN_POR_DEFECTO;
   document.getElementById("authModal").hidden = false;
 }
 
@@ -345,7 +349,7 @@ document.addEventListener("click", (e) => {
 
 document.addEventListener("DOMContentLoaded", () => {
   inyectarModalLogin();
-  /* Otras páginas (ej. perfil.js) pueden esperar esta promesa para saber
+  /* Otras páginas pueden esperar esta promesa para saber
      si el usuario está logueado antes de decidir qué mostrar. */
   Auth.listo = verificarSesion();
 });

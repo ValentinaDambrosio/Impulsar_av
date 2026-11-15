@@ -3,7 +3,7 @@
 import bcrypt from "bcryptjs";
 import { sql } from "../_lib/db.js";
 import { json, error } from "../_lib/http.js";
-import { crearCookie } from "../_lib/sesion.js";
+import { crearCookie, leerSesion } from "../_lib/sesion.js";
 import { validarTrabajador, generarSlug } from "../_lib/validar.js";
 import {
   parsearFormulario, subir, borrar, BUCKETS, TIPOS_FOTO, MAX_FOTO
@@ -26,28 +26,47 @@ export default async function handler(req, res) {
     return error(res, 400, "No se pudo leer el formulario");
   }
 
+  
+  const sesion = leerSesion(req);
+
+  if (sesion?.tipo === "trabajador") {
+    return error(res, 409, "Ya tenés una cuenta de trabajador. Podés cargar tus oficios desde la Parte 2.");
+  }
+
+  let usuario = null;
+  if (sesion?.tipo === "usuario") {
+    [usuario] = await sql`
+      SELECT id, nombre, apellido, email, password_hash, seguimientos_habilitados
+      FROM usuarios
+      WHERE id = ${sesion.id}
+    `;
+    if (!usuario) return error(res, 401, "Tu sesión ya no es válida. Volvé a iniciar sesión.");
+  }
+
   const datos = {
-    nombre: (campos.nombre || "").trim(),
-    apellido: (campos.apellido || "").trim(),
+    nombre: usuario ? usuario.nombre : (campos.nombre || "").trim(),
+    apellido: usuario ? usuario.apellido : (campos.apellido || "").trim(),
     edad: parseInt(campos.edad || "0", 10),
     celular: (campos.celular || "").trim(),
-    email: (campos.email || "").trim(),
+    email: usuario ? usuario.email : (campos.email || "").trim(),
     barrio: (campos.barrio || "").trim(),
     instagram: (campos.instagram || "").trim(),
     estudios: (campos.estudios || "").trim(),
     password: campos.password || ""
   };
 
-  const errores = validarTrabajador(datos, { conPassword: true });
+  
+  const errores = validarTrabajador(datos, { conPassword: !usuario, conDominio: !usuario });
   if (errores.length) return error(res, 400, errores.join(". "));
 
-  // El email no puede estar en ninguna de las dos tablas
+
   const [[yaTrabajador], [yaUsuario]] = await Promise.all([
     sql`SELECT 1 FROM trabajadores WHERE email = ${datos.email}`,
     sql`SELECT 1 FROM usuarios WHERE email = ${datos.email}`
   ]);
 
-  if (yaTrabajador || yaUsuario) {
+  
+  if (yaTrabajador || (yaUsuario && !usuario)) {
     return error(res, 409, "Ese email ya está registrado. Iniciá sesión o usá otro email.");
   }
 
@@ -65,7 +84,9 @@ export default async function handler(req, res) {
    * Acá el INSERT es el que decide — provider_id es UNIQUE — y si choca (23505)
    * se reintenta con el sufijo siguiente. La base no deja que se pisen. */
   const base = generarSlug(`${datos.nombre}-${datos.apellido}`) || "trabajador";
-  const passwordHash = await bcrypt.hash(datos.password, 10);
+  const passwordHash = usuario
+    ? usuario.password_hash // misma contraseña que ya tenía
+    : await bcrypt.hash(datos.password, 10);
 
   let subida = null;
   try {
@@ -96,8 +117,6 @@ export default async function handler(req, res) {
         await borrar(BUCKETS.fotosPerfil, subida.archivo);
         return error(res, 500, "No se pudo completar el registro");
       }
-      // Puede chocar el provider_id (probamos el siguiente) o el email
-      // (alguien se registró en el medio: eso no se reintenta).
       if (e.constraint_name?.includes("email") || e.detail?.includes("email")) {
         await borrar(BUCKETS.fotosPerfil, subida.archivo);
         return error(res, 409, "Ese email ya está registrado");
@@ -109,6 +128,26 @@ export default async function handler(req, res) {
   if (!guardado) {
     await borrar(BUCKETS.fotosPerfil, subida.archivo);
     return error(res, 500, "No se pudo generar un identificador para tu perfil");
+  }
+
+  if (usuario) {
+    try {
+      await sql.begin(async (tx) => {
+        await tx`
+          UPDATE trabajadores
+          SET seguimientos_habilitados = ${usuario.seguimientos_habilitados}
+          WHERE provider_id = ${slug}
+        `;
+        await tx`
+          UPDATE seguimientos
+          SET contactante_tipo = 'trabajador', contactante_id = ${slug}
+          WHERE contactante_tipo = 'usuario' AND contactante_id = ${String(usuario.id)}
+        `;
+        await tx`DELETE FROM usuarios WHERE id = ${usuario.id}`;
+      });
+    } catch (e) {
+      console.error("registro (promoción de usuario a trabajador):", e);
+    }
   }
 
   crearCookie(res, {

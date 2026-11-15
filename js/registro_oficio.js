@@ -416,7 +416,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       btnFinalizar.textContent = "Guardando...";
 
-      await fetch("api/guardar_oficios", {
+      const respuesta = await fetch("api/guardar_oficios", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ provider_id: providerId, oficios })
@@ -430,7 +430,7 @@ document.addEventListener("DOMContentLoaded", () => {
         : "¡Listo! Tu registro se completó con éxito. Te llevamos al inicio...";
       const tituloPopup = vieneDelPanel ? "¡Se agregó a tu perfil!" : "¡Tu registro se completó!";
 
-      const canalUrl = await obtenerLinkCanal();
+      const canalUrl = respuesta.primera_vez ? await obtenerLinkCanal() : null;
 
       if (canalUrl) {
         mostrarInvitacionCanal(canalUrl, destino, tituloPopup);

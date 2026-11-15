@@ -7,6 +7,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const inputFoto = document.getElementById("foto");
   const previewFoto = document.getElementById("previewFoto");
 
+  // true cuando la persona ya tiene una cuenta de usuario
+  let modoUsuario = false;
+
   /* Validaciones */
 
   const SOLO_LETRAS = /^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ\s]+$/;
@@ -96,7 +99,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const nombreOk = revisarNombre();
     const apellidoOk = revisarApellido();
-    const emailOk = revisarEmail();
+    const emailOk = modoUsuario ? true : revisarEmail();
     const celularOk = revisarCelular();
     const barrioOk = revisarBarrio();
 
@@ -105,17 +108,19 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    const password = document.getElementById("password").value;
-    const password2 = document.getElementById("password2").value;
+    if (!modoUsuario) {
+      const password = document.getElementById("password").value;
+      const password2 = document.getElementById("password2").value;
 
-    if (password !== password2) {
-      mostrarError("Las contraseñas no coinciden.");
-      return;
-    }
+      if (password !== password2) {
+        mostrarError("Las contraseñas no coinciden.");
+        return;
+      }
 
-    if (password.length < 6) {
-      mostrarError("La contraseña tiene que tener al menos 6 caracteres.");
-      return;
+      if (password.length < 6) {
+        mostrarError("La contraseña tiene que tener al menos 6 caracteres.");
+        return;
+      }
     }
 
     const archivo = inputFoto.files[0];
@@ -159,4 +164,84 @@ document.addEventListener("DOMContentLoaded", () => {
     btn.disabled = false;
     btn.textContent = "Continuar a la Parte 2";
   }
+
+
+  const puerta = document.getElementById("puertaRegistro");
+  const tarjetaFormulario = document.getElementById("tarjetaFormulario");
+
+  function mostrarPuerta() {
+    tarjetaFormulario.hidden = true;
+    puerta.hidden = false;
+  }
+
+  function mostrarFormulario() {
+    puerta.hidden = true;
+    tarjetaFormulario.hidden = false;
+  }
+
+  // Completa y bloquea los datos que ya están en la cuenta de usuario
+  async function prepararFormularioParaUsuario() {
+    const res = await fetch("api/mi_cuenta");
+    const cuenta = await res.json();
+    if (!res.ok || cuenta.tipo !== "usuario") throw new Error("Sin cuenta de usuario");
+
+    [["nombre", cuenta.nombre], ["apellido", cuenta.apellido], ["email", cuenta.email]].forEach(
+      ([id, valor]) => {
+        const input = document.getElementById(id);
+        input.value = valor;
+        input.readOnly = true;
+        input.style.background = "#f0f0f2";
+        input.style.color = "#666";
+        input.style.cursor = "not-allowed";
+      }
+    );
+
+    document.getElementById("filaPassword").hidden = true;
+    ["password", "password2"].forEach((id) => {
+      const input = document.getElementById(id);
+      input.required = false;
+      input.disabled = true;
+    });
+
+    document.getElementById("tituloRegistro").textContent = "Completá tus datos para publicar tu servicio";
+    document.getElementById("textoRegistro").textContent =
+      "Ya tenés una cuenta en Impulsar, así que usamos tu nombre, apellido y correo. Completá el resto y seguí a la Parte 2. La información que cargues aparecerá en tu perfil público.";
+
+    modoUsuario = true;
+  }
+
+  async function decidirPaso() {
+    try {
+      await verificarSesion();
+    } catch {
+    }
+
+    if (Auth.logueado && Auth.tipo === "trabajador") {
+      window.location.replace(`registro_oficio.html?id=${encodeURIComponent(Auth.id)}`);
+      return;
+    }
+
+    if (Auth.logueado && Auth.tipo === "usuario") {
+      try {
+        await prepararFormularioParaUsuario();
+        mostrarFormulario();
+      } catch {
+        mostrarPuerta();
+      }
+      return;
+    }
+
+    mostrarPuerta();
+  }
+
+  document.getElementById("btnNoTengoCuenta").addEventListener("click", mostrarFormulario);
+
+  document.getElementById("btnYaTengoCuenta").addEventListener("click", () => {
+    mostrarModalLogin(
+      decidirPaso,
+      "Iniciá sesión con tu cuenta para continuar con el registro de tu servicio."
+    );
+  });
+
+  decidirPaso();
 });

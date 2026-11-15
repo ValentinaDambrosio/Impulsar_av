@@ -26,7 +26,7 @@ export function validarNombreApellido(errores, nombre, apellido) {
 }
 
 /* El bloque de validación que compartían registro.php y actualizar_perfil.php */
-export function validarTrabajador(d, { conPassword }) {
+export function validarTrabajador(d, { conPassword, conDominio = true }) {
   const errores = [];
 
   validarNombreApellido(errores, d.nombre, d.apellido);
@@ -50,7 +50,7 @@ export function validarTrabajador(d, { conPassword }) {
 
   if (!esEmail(d.email)) {
     errores.push("Email inválido");
-  } else {
+  } else if (conDominio) {
     const dominio = d.email.slice(d.email.lastIndexOf("@") + 1).toLowerCase();
     if (!DOMINIOS_PERMITIDOS.includes(dominio)) {
       errores.push("Usá un email de Gmail, Hotmail, Outlook o Yahoo");

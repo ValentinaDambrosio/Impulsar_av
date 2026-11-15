@@ -29,6 +29,7 @@ import log_contacto from "./_endpoints/log_contacto.js";
 import log_vista_perfil from "./_endpoints/log_vista_perfil.js";
 import login from "./_endpoints/login.js";
 import logout from "./_endpoints/logout.js";
+import mi_cuenta from "./_endpoints/mi_cuenta.js";
 import registro from "./_endpoints/registro.js";
 import registro_usuario from "./_endpoints/registro_usuario.js";
 import resetear_password from "./_endpoints/resetear_password.js";
@@ -55,6 +56,7 @@ const RUTAS = {
   log_vista_perfil,
   login,
   logout,
+  mi_cuenta,
   registro,
   registro_usuario,
   resetear_password,

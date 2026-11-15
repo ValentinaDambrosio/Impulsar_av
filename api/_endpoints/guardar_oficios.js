@@ -105,6 +105,10 @@ export default async function handler(req, res) {
     });
   }
 
+  const [{ cantidad: oficiosPrevios }] = await sql`
+    SELECT count(*)::int AS cantidad FROM oficios WHERE provider_id = ${providerId}
+  `;
+
   try {
     await sql.begin(async (tx) => {
       for (const o of limpios) {
@@ -140,7 +144,7 @@ export default async function handler(req, res) {
     nombre: `${trabajador.nombre} ${trabajador.apellido}`
   });
 
-  json(res, 200, { ok: true, cantidad: limpios.length });
+  json(res, 200, { ok: true, cantidad: limpios.length, primera_vez: oficiosPrevios === 0 });
 }
 
 function escapeRegex(texto) {
