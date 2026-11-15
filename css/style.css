@@ -708,6 +708,23 @@ img {
     margin-top: 4px;
 }
 
+.oficio-card-acciones {
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+    flex-shrink: 0;
+}
+
+.oficio-card-editar {
+    color: #888;
+    font-size: 0.85rem;
+    padding: 4px 6px;
+}
+
+.oficio-card-editar:hover {
+    color: var(--primary-color);
+}
+
 .oficio-card-quitar {
     background: none;
     border: none;

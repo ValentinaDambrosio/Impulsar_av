@@ -90,9 +90,14 @@ function armarListaOficios(oficios) {
           ${o.descripcion ? `<span class="oficio-card-descripcion">${escapeHtml(o.descripcion)}</span>` : ""}
           ${o.media.length > 0 ? `<div class="oficio-card-media">${o.media.map(armarMediaMiniHtml).join("")}</div>` : ""}
         </div>
-        <button type="button" class="oficio-card-quitar" data-id="${o.id}" aria-label="Borrar este oficio">
-          <i class="fas fa-trash"></i>
-        </button>
+        <div class="oficio-card-acciones">
+          <a class="oficio-card-editar" href="registro_oficio.html?editar=${o.id}" aria-label="Editar este servicio">
+            <i class="fas fa-pen"></i> Editar
+          </a>
+          <button type="button" class="oficio-card-quitar" data-id="${o.id}" aria-label="Borrar este oficio">
+            <i class="fas fa-trash"></i>
+          </button>
+        </div>
       </div>`
     )
     .join("");

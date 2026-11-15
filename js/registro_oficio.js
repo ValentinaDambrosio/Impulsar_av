@@ -37,6 +37,12 @@ async function obtenerLinkCanal() {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+  const idEdicion = new URLSearchParams(window.location.search).get("editar");
+  if (idEdicion && typeof iniciarEdicionOficio === "function") {
+    iniciarEdicionOficio(idEdicion);
+    return;
+  }
+
   const providerId = obtenerProviderId();
 
   if (!providerId) {
