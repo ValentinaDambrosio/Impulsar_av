@@ -59,7 +59,7 @@ export default async function handler(req, res) {
   const nombreCompleto = `${nombre} ${apellido}`;
   crearCookie(res, { tipo: "usuario", id: usuario.id, nombre: nombreCompleto });
 
-  await avisarAMake({ tipo: "bienvenida", email, nombre, apellido });
+  await avisarAMake({ tipo: "bienvenida", cuenta: "usuario", email, nombre, apellido });
 
   json(res, 200, { ok: true, tipo: "usuario", nombre: nombreCompleto, id: usuario.id });
 }

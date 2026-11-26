@@ -323,7 +323,7 @@ document.addEventListener("DOMContentLoaded", () => {
         <div class="oficio-card">
           <div class="oficio-card-info">
             <strong>${o.oficios.join(", ")}</strong>
-            <span class="oficio-card-rubro">${o.rubro}</span>
+            ${o.rubro.startsWith("Otro (") ? "" : `<span class="oficio-card-rubro">${o.rubro}</span>`}
             ${
               o.certificaciones.length > 0
                 ? `<span class="oficio-card-certs">${o.certificaciones.join(", ")}</span>`

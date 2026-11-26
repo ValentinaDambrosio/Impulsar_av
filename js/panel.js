@@ -81,7 +81,7 @@ function armarListaOficios(oficios) {
       <div class="oficio-card" data-oficio-id="${o.id}">
         <div class="oficio-card-info">
           <strong>${escapeHtml(o.oficios.join(", "))}</strong>
-          <span class="oficio-card-rubro">${escapeHtml(o.rubro)}</span>
+          ${o.rubro.startsWith("Otro (") ? "" : `<span class="oficio-card-rubro">${escapeHtml(o.rubro)}</span>`}
           ${
             o.certificaciones.length > 0
               ? `<span class="oficio-card-certs">${o.certificaciones.map(escapeHtml).join(", ")}</span>`

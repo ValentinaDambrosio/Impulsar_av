@@ -27,7 +27,11 @@ export default async function handler(req, res) {
     return error(res, 400, "No se pudo leer el formulario");
   }
 
-
+  /* ¿Ya tiene sesión? Se resuelve acá y no en el navegador, que se puede alterar.
+   *  - Trabajador: ya tiene su cuenta; lo único que le falta es cargar oficios.
+   *  - Usuario: se "promueve" su cuenta a trabajador. Nombre, apellido, correo y
+   *    contraseña se toman de la cuenta que ya tiene (lo que venga en el formulario
+   *    para esos campos se ignora) y solo se piden los datos que le faltan. */
   const sesion = leerSesion(req);
 
   if (sesion?.tipo === "trabajador") {
@@ -165,6 +169,7 @@ export default async function handler(req, res) {
   // y lo que quede después no tiene garantía de correr (ver solicitar_reset.js)
   await avisarAMake({
     tipo: "bienvenida",
+    cuenta: "trabajador",
     email: datos.email,
     nombre: datos.nombre,
     apellido: datos.apellido

@@ -57,7 +57,7 @@ function armarOficioSeccion(oficio) {
   return `
     <div class="oficio-perfil-card">
       <h3>${escapeHtml(oficio.oficios.join(", "))}</h3>
-      <span class="oficio-perfil-rubro">${escapeHtml(oficio.rubro)}</span>
+      ${oficio.rubro.startsWith("Otro (") ? "" : `<span class="oficio-perfil-rubro">${escapeHtml(oficio.rubro)}</span>`}
       ${certs}
       ${descripcion}
       ${galeria}
